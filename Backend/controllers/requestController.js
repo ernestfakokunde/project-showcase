@@ -6,7 +6,7 @@ import Notification from "../models/notificationModel.js";
 // Send join request
 export const sendRequest = async (req, res) => {
   try {
-    const { projectId, pitch } = req.body;
+    const { projectId, pitch, whatYouOffer, email, phone, socials } = req.body;
 
     if (!projectId || !pitch) {
       return res.status(400).json({ message: "Project ID and pitch are required" });
@@ -33,9 +33,13 @@ export const sendRequest = async (req, res) => {
       from: req.user._id,
       owner: project.owner,
       pitch,
+      whatYouOffer: whatYouOffer || "",
+      email: email || req.user.email,
+      phone: phone || "",
+      socials: socials || {},
     });
 
-    await request.populate("from", "username avatar");
+    await request.populate("from", "username avatar roles email");
     await request.populate("project", "title");
 
     // Create notification

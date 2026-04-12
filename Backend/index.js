@@ -3,6 +3,12 @@ import cors from "cors";
 import dotenv from "dotenv";
 import mongoose from "mongoose";
 import userRoutes from "./routes/userRoute.js";
+import projectRoutes from "./routes/projectRoutes.js";
+import requestRoutes from "./routes/requestRoutes.js";
+import commentRoutes from "./routes/commentRoutes.js";
+import notificationRoutes from "./routes/notificationRoutes.js";
+import adminRoutes from "./routes/adminRoutes.js";
+import messageRoutes from "./routes/messageRoute.js";
 import { connectDB } from "./config/db.js";
 
 
@@ -21,6 +27,12 @@ app.use(express.json())
 
 //setup Routes
 app.use("/api/users", userRoutes)
+app.use("/api/projects", projectRoutes)
+app.use("/api/requests", requestRoutes)
+app.use("/api/comments", commentRoutes)
+app.use("/api/notifications", notificationRoutes)
+app.use("/api/admin", adminRoutes)
+app.use("/api/messages", messageRoutes)
 
 //Health check 
 app.get("/", (req, res) => {

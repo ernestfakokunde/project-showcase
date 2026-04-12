@@ -38,7 +38,11 @@ const Signup = () => {
       return setError("Please select at least one role")
     }
     setLoading(true)
+    setError("")
+    
     try {
+      console.log("Signup: Sending registration request");
+      
       const res = await fetch("http://localhost:8000/api/users/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -49,16 +53,30 @@ const Signup = () => {
           roles: selectedRoles,
         }),
       })
+      
       const data = await res.json()
+      console.log("Signup: Response received", { status: res.status, data });
+      
       if (!res.ok) {
-        setError(data.message)
+        const errorMsg = data.message || "Registration failed";
+        console.error("Signup: Error response", errorMsg);
+        setError(errorMsg)
         setLoading(false)
         return
       }
 
+      if (!data.token) {
+        console.error("Signup: No token in response");
+        setError("Server error: No token received")
+        setLoading(false)
+        return
+      }
+
+      console.log("Signup: Calling login function with:", { username: data.username, token: data.token });
       login(data, data.token)
       
     } catch (err) {
+      console.error("Signup: Exception occurred", err);
       setError("Something went wrong. Try again.")
       setLoading(false)
     }

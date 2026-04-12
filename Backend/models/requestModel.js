@@ -22,6 +22,25 @@ const requestSchema = new mongoose.Schema(
       required: [true, "Pitch message is required"],
       maxlength: 1000,
     },
+    whatYouOffer: {
+      type: String,
+      default: "",
+      maxlength: 500,
+    },
+    email: {
+      type: String,
+      default: "",
+    },
+    phone: {
+      type: String,
+      default: "",
+    },
+    socials: {
+      github: { type: String, default: "" },
+      linkedin: { type: String, default: "" },
+      portfolio: { type: String, default: "" },
+      twitter: { type: String, default: "" },
+    },
     status: {
       type: String,
       enum: ["pending", "accepted", "declined"],

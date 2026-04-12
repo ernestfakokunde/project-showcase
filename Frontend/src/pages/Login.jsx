@@ -20,22 +20,40 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault()
     setLoading(true)
+    setError("")
+    
     try {
+      console.log("Login: Sending login request");
+      
       const res = await fetch("http://localhost:8000/api/users/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
       })
+      
       const data = await res.json()
+      console.log("Login: Response received", { status: res.status, data });
+      
       if (!res.ok) {
-        setError(data.message)
+        const errorMsg = data.message || "Login failed";
+        console.error("Login: Error response", errorMsg);
+        setError(errorMsg)
         setLoading(false)
         return
       }
 
+      if (!data.token) {
+        console.error("Login: No token in response");
+        setError("Server error: No token received")
+        setLoading(false)
+        return
+      }
+
+      console.log("Login: Calling login function with:", { username: data.username, token: data.token });
       login(data, data.token)
       
     } catch (err) {
+      console.error("Login: Exception occurred", err);
       setError("Something went wrong. Try again.")
       setLoading(false)
     }

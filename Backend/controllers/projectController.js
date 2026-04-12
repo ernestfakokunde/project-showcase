@@ -70,12 +70,13 @@ export const getProjects = async (req, res) => {
 // Get single project
 export const getProjectById = async (req, res) => {
   try {
+    if (!req.params.id) {
+      return res.status(400).json({ message: "Project ID is required" });
+    }
+
     const project = await Project.findById(req.params.id)
       .populate("owner", "username email avatar bio roles skills links")
-      .populate("collaborators", "username avatar roles")
-      .populate({
-        path: "links",
-      });
+      .populate("collaborators", "username avatar roles");
 
     if (!project) {
       return res.status(404).json({ message: "Project not found" });
@@ -86,7 +87,12 @@ export const getProjectById = async (req, res) => {
 
     res.json({ project, isCollaborator });
   } catch (error) {
-    res.status(500).json({ message: "Error fetching project", error: error.message });
+    console.error("Error fetching project:", error);
+    res.status(500).json({ 
+      message: "Error fetching project", 
+      error: error.message,
+      details: "Check server logs for more information"
+    });
   }
 };
 
@@ -261,8 +267,11 @@ export const getTrendingProjects = async (req, res) => {
 
     const projects = await Project.find({ isActive: true })
       .populate("owner", "username email avatar")
-      .sort("-likes")
-      .limit(parseInt(limit));
+      .limit(parseInt(limit))
+      .then(projects => {
+        // Sort in memory by likes count
+        return projects.sort((a, b) => b.likes.length - a.likes.length);
+      });
 
     res.json({ projects });
   } catch (error) {

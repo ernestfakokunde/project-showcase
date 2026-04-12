@@ -7,23 +7,60 @@ import Login from "./pages/Login";
 import Profile from "./pages/Profile";
 import Notifications from "./pages/Notifications";
 import CollabRequests from "./pages/CollabRequests";
-import PlaceholderPage from "./pages/PlaceholderPage";
+import Search from "./pages/Search";
+import Trending from "./pages/Trending";
+import Saved from "./pages/Saved";
+import MyProjects from "./pages/MyProjects";
+import Messages from "./pages/Messages";
 import AppLayout from "./layout/AppLayout";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
-import PostProject from "./pages/PostProject";
 import ProjectDetail from "./pages/ProjectDetail";
+import ProjectModal from "./components/modals/ProjectModal";
+import Toast from "./components/Toast";
 import { useAuth } from "./context/AuthContext";
+import { useApp } from "./context/AppContext";
 
 const ProtectedRoute = ({ children }) => {
-  const { token, loading } = useAuth();
-  if (loading) return <div className="min-h-screen bg-[#09090e]" />;
-  return token ? children : <Navigate to="/login" replace />;
+  try {
+    const auth = useAuth();
+    
+    if (!auth) {
+      console.error("ProtectedRoute: useAuth() returned undefined - AuthProvider may not be wrapping this component");
+      return <Navigate to="/login" replace />;
+    }
+    
+    const { token, loading } = auth;
+    
+    console.log("ProtectedRoute: loading=", loading, "token=", !!token);
+    
+    if (loading) return <div className="min-h-screen bg-[#09090e]" />;
+    
+    if (!token) {
+      console.log("ProtectedRoute: No token, redirecting to login");
+      return <Navigate to="/login" replace />;
+    }
+    
+    return children;
+  } catch (error) {
+    console.error("ProtectedRoute: Error in ProtectedRoute:", error);
+    return <Navigate to="/login" replace />;
+  }
+};
+
+const MyProfileRedirect = () => {
+  const { user } = useAuth();
+  return user ? <Navigate to={`/profile/${user.username}`} replace /> : <Navigate to="/feed" replace />;
 };
 
 function App() {
+  const { showProjectModal } = useApp();
+
   return (
-    <Routes>
+    <>
+      {showProjectModal && <ProjectModal />}
+      <Toast />
+      <Routes>
       <Route path="/" element={<PublicLayout />}>
         <Route index element={<LandingPage />} />
         <Route path="login" element={<Login />} />
@@ -41,20 +78,21 @@ function App() {
         }
       >
         <Route path="feed" element={<Feed />} />
-        <Route path="profile" element={<Profile />} />
+        <Route path="search" element={<Search />} />
+        <Route path="profile" element={<MyProfileRedirect />} />
+        <Route path="profile/:username" element={<Profile />} />
         <Route path="notifications" element={<Notifications />} />
-        <Route path="create" element={<PostProject />} />
-        <Route path="post-project" element={<PostProject />} />
         <Route path="project/:id" element={<ProjectDetail />} />
         <Route path="requests" element={<CollabRequests />} />
-        <Route path="trending" element={<PlaceholderPage />} />
-        <Route path="saved" element={<PlaceholderPage />} />
-        <Route path="my-projects" element={<PlaceholderPage />} />
-        <Route path="messages" element={<PlaceholderPage />} />
+        <Route path="trending" element={<Trending />} />
+        <Route path="saved" element={<Saved />} />
+        <Route path="my-projects" element={<MyProjects />} />
+        <Route path="messages" element={<Messages />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
+    </>
   );
 }
 

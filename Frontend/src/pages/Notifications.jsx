@@ -1,101 +1,168 @@
-import { useMemo } from "react";
+import { useEffect, useState } from "react";
+import { useAuth } from "../context/AuthContext";
+import { useToast } from "../context/ToastContext";
 import Topbar from "../components/layout/Topbar";
-import NotifItem from "../components/notifications/NotifItem";
 
-const tabs = [
-  { key: "all", label: "All" },
-  { key: "requests", label: "Join requests" },
-  { key: "activity", label: "Activity" },
-  { key: "following", label: "Following" },
-];
+const Notifications = () => {
+  const { authFetch } = useAuth();
+  const { addToast } = useToast();
+  const [notifications, setNotifications] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-const Notifications = ({ notifications = [], activeTab = "all", onTabChange, onAccept, onDecline, onMarkAllRead }) => {
-  const grouped = useMemo(() => groupNotifications(notifications), [notifications]);
-  const counts = useMemo(() => countByType(notifications), [notifications]);
+  useEffect(() => {
+    fetchNotifications();
+  }, []);
+
+  const fetchNotifications = async () => {
+    try {
+      const res = await authFetch("/api/notifications");
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message);
+      }
+
+      setNotifications(data.notifications || []);
+    } catch (error) {
+      addToast(error.message, "error");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleMarkAsRead = async (notifId) => {
+    try {
+      const res = await authFetch(`/api/notifications/${notifId}/read`, { method: "PUT" });
+
+      if (!res.ok) {
+        throw new Error("Failed to mark as read");
+      }
+
+      setNotifications((prev) =>
+        prev.map((n) => (n._id === notifId ? { ...n, read: true } : n))
+      );
+    } catch (error) {
+      addToast(error.message, "error");
+    }
+  };
+
+  const handleDelete = async (notifId) => {
+    try {
+      const res = await authFetch(`/api/notifications/${notifId}`, { method: "DELETE" });
+
+      if (!res.ok) {
+        throw new Error("Failed to delete");
+      }
+
+      setNotifications((prev) => prev.filter((n) => n._id !== notifId));
+      addToast("Deleted", "success");
+    } catch (error) {
+      addToast(error.message, "error");
+    }
+  };
+
+  const getNotificationMessage = (notif) => {
+    switch (notif.type) {
+      case "join_request":
+        return `@${notif.from?.username} requested to join "${notif.project?.title}"`;
+      case "accepted":
+        return `Your pitch was accepted for "${notif.project?.title}"!`;
+      case "declined":
+        return `Your pitch was declined for "${notif.project?.title}"`;
+      case "like":
+        return `@${notif.from?.username} liked your project "${notif.project?.title}"`;
+      case "comment":
+        return `@${notif.from?.username} commented on "${notif.project?.title}"`;
+      case "follow":
+        return `@${notif.from?.username} started following you`;
+      default:
+        return "New notification";
+    }
+  };
+
+  const getNotificationIcon = (type) => {
+    const icons = {
+      join_request: "📨",
+      accepted: "✅",
+      declined: "❌",
+      like: "❤️",
+      comment: "💬",
+      follow: "👥",
+    };
+    return icons[type] || "🔔";
+  };
 
   return (
     <main className="min-h-screen bg-[#09090e] text-white">
-      <Topbar variant="title" title="Notifications" onMarkAllRead={onMarkAllRead} />
+      <Topbar variant="title" title="Notifications" />
 
-      <div className="mx-auto max-w-[640px] px-7 py-6">
-        <div className="mb-5 flex border-b border-white/10">
-          {tabs.map((tab) => {
-            const isActive = tab.key === activeTab;
-            const count = tab.key === "all" ? notifications.length : tab.key === "requests" ? counts.requests : undefined;
-            return (
-              <button
-                key={tab.key}
-                type="button"
-                onClick={() => onTabChange?.(tab.key)}
-                className={`-mb-px flex items-center gap-1 border-b-2 px-4 py-2 text-[13px] ${
-                  isActive
-                    ? "border-[#7f77dd] text-[#afa9ec]"
-                    : "border-transparent text-white/35"
-                }`}
-              >
-                {tab.label}
-                {typeof count === "number" ? (
-                  <span className="rounded-full bg-[#7f77dd]/20 px-1.5 text-[10px] text-[#afa9ec]">
-                    {count}
-                  </span>
-                ) : null}
-              </button>
-            );
-          })}
+      <div className="flex">
+        <div className="w-full max-w-[680px] flex-1 border-r border-white/10">
+          {loading ? (
+            <div className="p-6 text-center text-white/40">Loading notifications...</div>
+          ) : notifications.length === 0 ? (
+            <div className="p-6 text-center text-white/40">No notifications yet</div>
+          ) : (
+            <div className="divide-y divide-white/10">
+              {notifications.map((notif) => (
+                <div
+                  key={notif._id}
+                  className={`p-6 ${notif.read ? "bg-[#09090e]" : "bg-[#7f77dd]/5"} border-l-4 ${
+                    notif.read ? "border-transparent" : "border-[#7f77dd]"
+                  } hover:bg-white/5 transition group`}
+                >
+                  <div className="flex items-start gap-4">
+                    <div className="text-2xl flex-shrink-0">{getNotificationIcon(notif.type)}</div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm text-white">{getNotificationMessage(notif)}</p>
+                      <p className="text-xs text-white/30 mt-1">
+                        {new Date(notif.createdAt).toLocaleDateString()}
+                      </p>
+                    </div>
+                    <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition flex-shrink-0">
+                      {!notif.read && (
+                        <button
+                          onClick={() => handleMarkAsRead(notif._id)}
+                          className="text-xs px-3 py-1 rounded-[4px] bg-[#7f77dd]/20 text-[#afa9ec] hover:bg-[#7f77dd]/30"
+                        >
+                          Mark read
+                        </button>
+                      )}
+                      <button
+                        onClick={() => handleDelete(notif._id)}
+                        className="text-xs px-3 py-1 rounded-[4px] bg-white/5 text-white/50 hover:bg-white/10"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Action Button for specific types */}
+                  {notif.type === "accepted" && (
+                    <a
+                      href={`/project/${notif.project?._id}`}
+                      className="mt-3 inline-block text-xs px-4 py-2 rounded-[6px] bg-[#7f77dd] text-white hover:bg-[#7f77dd]/90"
+                    >
+                      View Project
+                    </a>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
-        {notifications.length === 0 ? (
-          <div className="rounded-[12px] border border-white/10 bg-[#111118] p-6 text-center text-sm text-white/40">
-            You're all caught up
+        {/* Right Panel */}
+        <div className="hidden w-[240px] border-l border-white/10 p-6 lg:block">
+          <div className="rounded-[12px] bg-white/5 border border-white/10 p-4">
+            <h3 className="text-xs font-medium text-white/60 mb-3 uppercase">Notifications</h3>
+            <p className="text-xs text-white/40">
+              {notifications.filter((n) => !n.read).length} unread
+            </p>
           </div>
-        ) : (
-          Object.entries(grouped).map(([label, items]) => (
-            <div key={label} className="mb-4">
-              <div className="mb-2 text-[11px] uppercase tracking-[0.6px] text-white/25">{label}</div>
-              <div className="space-y-2">
-                {items.map((item) => (
-                  <NotifItem
-                    key={item._id || item.id}
-                    {...item}
-                    onAccept={() => onAccept?.(item)}
-                    onDecline={() => onDecline?.(item)}
-                  />
-                ))}
-              </div>
-            </div>
-          ))
-        )}
+        </div>
       </div>
     </main>
-  );
-};
-
-const groupNotifications = (notifications) => {
-  const groups = { Today: [], Yesterday: [], Older: [] };
-
-  notifications.forEach((item) => {
-    if (item.group) {
-      if (!groups[item.group]) groups[item.group] = [];
-      groups[item.group].push(item);
-      return;
-    }
-
-    const label = typeof item.createdAt === "string" && item.createdAt.toLowerCase().includes("yesterday") ? "Yesterday" : "Today";
-    groups[label].push(item);
-  });
-
-  return Object.fromEntries(Object.entries(groups).filter(([, items]) => items.length));
-};
-
-const countByType = (notifications) => {
-  return notifications.reduce(
-    (acc, item) => {
-      if (item.type === "join_request") acc.requests += 1;
-      if (item.type === "follow") acc.following += 1;
-      if (["like", "comment", "accepted", "rejected"].includes(item.type)) acc.activity += 1;
-      return acc;
-    },
-    { requests: 0, following: 0, activity: 0 }
   );
 };
 

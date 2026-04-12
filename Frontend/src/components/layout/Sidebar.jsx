@@ -1,4 +1,4 @@
-import { NavLink } from "react-router-dom";
+import { NavLink, Link, useNavigate } from "react-router-dom";
 
 const menuItems = [
   { to: "/feed", label: "Feed", icon: FeedIcon },
@@ -21,21 +21,23 @@ const categoryItems = [
   { to: "/feed?category=Game%20dev", label: "Game dev", icon: GameIcon },
 ];
 
-const Sidebar = ({ collapsed = false, setCollapsed, user, notifCount = 0, requestCount = 0 }) => {
+const Sidebar = ({ collapsed = false, setCollapsed, user, logout, notifCount = 0, requestCount = 0, isMobile = false }) => {
   const initials = (user?.initials || user?.username?.slice(0, 2) || "SL").toUpperCase();
 
   return (
     <aside
       className={`flex min-h-screen flex-col border-r border-white/10 bg-[#0d0d14] transition-all duration-200 ${
+        isMobile ? "fixed inset-0 z-40" : "relative"
+      } ${
         collapsed ? "w-[60px]" : "w-[220px]"
       }`}
     >
-      <div className="flex items-center gap-[9px] border-b border-white/10 px-[18px] py-[20px]">
-        <div className="flex h-[28px] w-[28px] items-center justify-center rounded-[7px] bg-[#7f77dd]">
-          <GridIcon className="h-4 w-4 text-white" />
+      <div className="flex items-center gap-[9px] border-b border-white/10 px-[12px] sm:px-[18px] py-[16px] sm:py-[20px]">
+        <div className="flex h-[24px] sm:h-[28px] w-[24px] sm:w-[28px] items-center justify-center rounded-[6px] sm:rounded-[7px] bg-[#7f77dd]">
+          <GridIcon className="h-3.5 sm:h-4 w-3.5 sm:w-4 text-white" />
         </div>
         {!collapsed ? (
-          <span className="text-[15px] font-medium tracking-[-0.3px] text-white">
+          <span className="text-[13px] sm:text-[15px] font-medium tracking-[-0.3px] text-white">
             Stack<span className="text-[#7f77dd]">Lab</span>
           </span>
         ) : null}
@@ -65,20 +67,34 @@ const Sidebar = ({ collapsed = false, setCollapsed, user, notifCount = 0, reques
       <Divider />
       <SidebarSection title="Categories" collapsed={collapsed} items={categoryItems} />
 
-      <div className="mt-auto border-t border-white/10 px-3 py-[14px]">
-        <div className={`flex items-center ${collapsed ? "justify-center" : "gap-2"}`}>
-          <div className="relative flex h-[30px] w-[30px] items-center justify-center rounded-full bg-[#7f77dd]/25 text-[11px] font-medium text-[#afa9ec]">
+      <div className="mt-auto border-t border-white/10 px-2 sm:px-3 py-[10px] sm:py-[14px] space-y-1.5 sm:space-y-2">
+        <Link
+          to={`/profile/${user?.username}`}
+          className={`flex items-center rounded-lg px-1.5 sm:px-2 py-1.5 sm:py-2 transition hover:bg-white/5 ${collapsed ? "justify-center" : "gap-2"}`}
+        >
+          <div className="relative flex h-[28px] sm:h-[30px] w-[28px] sm:w-[30px] items-center justify-center rounded-full bg-[#7f77dd]/25 text-[10px] sm:text-[11px] font-medium text-[#afa9ec] flex-shrink-0">
             {initials}
             <span className="absolute -right-0.5 -top-0.5 h-1.5 w-1.5 rounded-full bg-[#1d9e75]" />
           </div>
           {!collapsed ? (
-            <div className="flex-1">
-              <div className="text-[12px] font-medium text-white">@{user?.username || "yourhandle"}</div>
-              <div className="text-[11px] text-white/30">{user?.role || user?.roles?.[0] || "Developer"}</div>
+            <div className="flex-1 min-w-0">
+              <div className="text-[11px] sm:text-[12px] font-medium text-white truncate">@{user?.username || "yourhandle"}</div>
+              <div className="text-[10px] sm:text-[11px] text-white/30 truncate">{user?.role || user?.roles?.[0] || "Developer"}</div>
             </div>
           ) : null}
-          {!collapsed ? <div className="h-1.5 w-1.5 rounded-full bg-[#1d9e75]" /> : null}
-        </div>
+        </Link>
+        
+        {logout && !collapsed && (
+          <button
+            onClick={logout}
+            className="w-full flex items-center gap-2 rounded-lg px-2 py-1.5 sm:py-2 text-xs sm:text-sm text-white/60 hover:bg-red-500/10 hover:text-red-400 transition"
+          >
+            <svg className="w-3.5 sm:w-4 h-3.5 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+            </svg>
+            Logout
+          </button>
+        )}
       </div>
     </aside>
   );

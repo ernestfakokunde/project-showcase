@@ -1,4 +1,5 @@
 import { useLocation } from "react-router-dom";
+import Topbar from "../components/layout/Topbar";
 
 const pageLabels = {
   "/trending": "Trending",
@@ -13,6 +14,7 @@ const PlaceholderPage = () => {
 
   return (
     <main className="min-h-screen bg-[#09090e] text-white">
+      <Topbar variant="title" title={label} />
       <div className="px-6 py-10">
         <div className="rounded-[32px] border border-white/10 bg-[#111118] p-8">
           <h1 className="text-2xl font-semibold">{label}</h1>

@@ -1,4 +1,4 @@
-const ProfileHeader = ({ user, stats = {}, isOwnProfile = false, onFollow }) => {
+const ProfileHeader = ({ user, stats = {}, isOwnProfile = false, onFollow, onEdit }) => {
   const initials = (user?.username?.slice(0, 2) || user?.fullName?.slice(0, 2) || "SL").toUpperCase();
   const roles = user?.roles || [];
   const links = user?.links || {};
@@ -44,9 +44,14 @@ const ProfileHeader = ({ user, stats = {}, isOwnProfile = false, onFollow }) => 
           </div>
 
           <div className="flex gap-2">
-            <button className="rounded-[8px] border border-white/10 bg-white/5 px-4 py-[7px] text-[12px] text-white/50">
-              Edit profile
-            </button>
+            {isOwnProfile ? (
+              <button 
+                onClick={onEdit}
+                className="rounded-[8px] border border-white/10 bg-white/5 px-4 py-[7px] text-[12px] text-white/50 hover:bg-white/10"
+              >
+                Edit profile
+              </button>
+            ) : null}
             <button
               type="button"
               onClick={onFollow}

@@ -1,4 +1,6 @@
-import { Link } from "react-router-dom";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useApp } from "../../context/AppContext";
 
 const Topbar = ({
   variant = "search",
@@ -8,21 +10,34 @@ const Topbar = ({
   showNotifDot = false,
   onBack,
   breadcrumb,
+  onToggleSidebar,
 }) => {
+  const { openProjectModal } = useApp();
+  const navigate = useNavigate();
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      navigate(`/search?q=${encodeURIComponent(searchQuery)}`);
+      setSearchQuery("");
+    }
+  };
   if (variant === "title") {
     return (
-      <div className="flex items-center justify-between border-b border-white/10 px-7 py-[14px]">
+      <div className="flex items-center justify-between border-b border-white/10 px-4 sm:px-6 py-3 sm:py-[14px]">
         <div>
-          <div className="text-[15px] font-medium text-white">{title || ""}</div>
-          {subtitle ? <div className="text-xs text-white/30">{subtitle}</div> : null}
+          <div className="text-[14px] sm:text-[15px] font-medium text-white">{title || ""}</div>
+          {subtitle ? <div className="text-[11px] sm:text-xs text-white/30">{subtitle}</div> : null}
         </div>
         {onMarkAllRead ? (
           <button
             type="button"
             onClick={onMarkAllRead}
-            className="text-[12px] text-[#7f77dd]/80"
+            className="text-[11px] sm:text-[12px] text-[#7f77dd]/80 whitespace-nowrap ml-2"
           >
-            Mark all as read
+            Mark read
           </button>
         ) : null}
       </div>
@@ -31,15 +46,25 @@ const Topbar = ({
 
   if (variant === "breadcrumb") {
     return (
-      <div className="flex items-center gap-3 border-b border-white/10 px-7 py-[14px]">
+      <div className="flex items-center gap-2 sm:gap-3 border-b border-white/10 px-4 sm:px-6 py-3 sm:py-[14px]">
+        {isMobile && onToggleSidebar && (
+          <button
+            type="button"
+            onClick={onToggleSidebar}
+            className="flex items-center justify-center p-2 rounded-lg border border-white/10 bg-white/5 text-white/40 hover:bg-white/10 flex-shrink-0"
+            aria-label="Open menu"
+          >
+            <MenuIcon className="h-4 w-4" />
+          </button>
+        )}
         <button
           type="button"
           onClick={onBack}
-          className="flex items-center gap-1 rounded-lg border border-white/10 bg-white/5 px-3 py-[5px] text-[13px] text-white/40"
+          className="flex items-center gap-1 rounded-lg border border-white/10 bg-white/5 px-2 sm:px-3 py-[5px] text-[12px] sm:text-[13px] text-white/40 hover:bg-white/10 flex-shrink-0"
         >
-          <BackIcon className="h-3.5 w-3.5" /> Back
+          <BackIcon className="h-3 sm:h-3.5 w-3 sm:w-3.5" /> Back
         </button>
-        <div className="text-[13px] text-white/25">
+        <div className="text-[12px] sm:text-[13px] text-white/25 truncate">
           {breadcrumb?.base || ""}
           <span className="text-white/60">{breadcrumb?.detail ? ` / ${breadcrumb.detail}` : ""}</span>
         </div>
@@ -48,29 +73,32 @@ const Topbar = ({
   }
 
   return (
-    <div className="flex items-center gap-[14px] border-b border-white/10 px-6 py-[14px]">
-      <div className="flex h-[34px] w-full max-w-[380px] items-center gap-2 rounded-[9px] border border-white/10 bg-white/5 px-3">
-        <SearchIcon className="h-[14px] w-[14px] text-white/30" />
+    <div className="flex items-center gap-2 sm:gap-[14px] border-b border-white/10 px-4 sm:px-6 py-2 sm:py-[14px]">
+      <form onSubmit={handleSearch} className="flex h-[32px] sm:h-[34px] w-full max-w-[280px] sm:max-w-[380px] items-center gap-2 rounded-[8px] sm:rounded-[9px] border border-white/10 bg-white/5 px-2 sm:px-3">
+        <SearchIcon className="h-[13px] sm:h-[14px] w-[13px] sm:w-[14px] text-white/30 flex-shrink-0" />
         <input
           type="search"
-          placeholder="Search projects, people, stacks..."
-          className="h-full w-full bg-transparent text-[13px] text-white/60 placeholder:text-white/25 focus:outline-none"
+          placeholder="Search..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="h-full w-full bg-transparent text-[12px] sm:text-[13px] text-white/60 placeholder:text-white/25 focus:outline-none"
         />
-      </div>
-      <div className="ml-auto flex items-center gap-2">
-        <button type="button" className="rounded-[8px] border border-white/10 bg-white/5 px-[14px] py-[6px] text-[12px] text-white/55">
+      </form>
+      <div className="ml-auto flex items-center gap-1.5 sm:gap-2">
+        <button type="button" className="hidden sm:block rounded-[8px] border border-white/10 bg-white/5 px-[12px] py-[6px] text-[11px] sm:text-[12px] text-white/55 hover:bg-white/10">
           Filters
         </button>
-        <div className="relative flex h-8 w-8 items-center justify-center rounded-[8px] border border-white/10 bg-white/5">
-          <BellIcon className="h-[15px] w-[15px] text-white/50" />
+        <a href="/notifications" className="relative flex h-8 w-8 items-center justify-center rounded-[8px] border border-white/10 bg-white/5 hover:bg-white/10">
+          <BellIcon className="h-[14px] sm:h-[15px] w-[14px] sm:w-[15px] text-white/50" />
           {showNotifDot ? <span className="absolute right-[5px] top-[5px] h-1.5 w-1.5 rounded-full bg-[#d85a30]" /> : null}
-        </div>
-        <Link
-          to="/post-project"
-          className="rounded-[8px] bg-[#7f77dd] px-4 py-[6px] text-[12px] font-medium text-white"
+        </a>
+        <button
+          type="button"
+          onClick={openProjectModal}
+          className="rounded-[8px] bg-[#7f77dd] px-3 sm:px-4 py-[6px] text-[11px] sm:text-[12px] font-medium text-white hover:bg-[#7f77dd]/90 whitespace-nowrap"
         >
-          + Post project
-        </Link>
+          + Post
+        </button>
       </div>
     </div>
   );
@@ -93,6 +121,12 @@ const BellIcon = ({ className }) => (
 const BackIcon = ({ className }) => (
   <svg viewBox="0 0 14 14" fill="none" className={className}>
     <path d="M9 2L4 7l5 5" stroke="currentColor" strokeWidth="1.5" />
+  </svg>
+);
+
+const MenuIcon = ({ className }) => (
+  <svg viewBox="0 0 24 24" fill="none" className={className}>
+    <path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
   </svg>
 );
 

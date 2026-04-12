@@ -177,10 +177,10 @@ const CreatePage = () => {
           </div>
 
           <div className="mt-6 flex flex-col gap-3 border-t border-white/10 pt-4 sm:flex-row sm:justify-between">
-            <button type="button" className="rounded-3xl border border-white/10 px-6 py-3 text-sm text-slate-300 transition hover:border-white/20">
+            <button type="button" onClick={() => window.history.back()} className="rounded-3xl border border-white/10 px-6 py-3 text-sm text-slate-300 transition hover:border-white/20">
               Back
             </button>
-            <button type="button" className="rounded-3xl bg-[#7f77dd] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#6c66c7]">
+            <button type="button" onClick={() => alert('Continue to next step')} className="rounded-3xl bg-[#7f77dd] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#6c66c7]">
               Continue to roles & links
             </button>
           </div>

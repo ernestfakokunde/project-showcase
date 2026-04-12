@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-const AuthContext = createContext();
+export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const navigate = useNavigate();
@@ -11,25 +11,68 @@ export const AuthProvider = ({ children }) => {
 
   //on app load check if user is logged in
   useEffect(() =>{
+    console.log("AuthProvider: Checking localStorage for existing session");
+    
+    // Test if localStorage works
+    try {
+      localStorage.setItem("_test", "test");
+      const testVal = localStorage.getItem("_test");
+      localStorage.removeItem("_test");
+      if (testVal !== "test") {
+        console.warn("AuthProvider: localStorage appears to be read-only or not working correctly");
+      }
+    } catch (e) {
+      console.error("AuthProvider: localStorage is not available:", e.message);
+    }
+    
     const storedUser = localStorage.getItem("user")
     const storedToken = localStorage.getItem("token")
 
+    console.log("AuthProvider: storedUser=", !!storedUser, "storedToken=", !!storedToken);
+
     if (storedUser && storedToken) {
-      setUser(JSON.parse(storedUser))
-      setToken(storedToken)
+      try {
+        const parsedUser = JSON.parse(storedUser);
+        console.log("AuthProvider: Parsed user:", { username: parsedUser.username, email: parsedUser.email });
+        setUser(parsedUser)
+        setToken(storedToken)
+        console.log("AuthProvider: Session restored from localStorage");
+      } catch (e) {
+        console.error("AuthProvider: Failed to parse stored user:", e);
+        localStorage.removeItem("user");
+        localStorage.removeItem("token");
+      }
+    } else {
+      console.log("AuthProvider: No session found in localStorage");
     }
     setLoading(false)
   }, [])
 
   const login = (userData, tokenData)=>{
-  localStorage.setItem("user", JSON.stringify(userData))
-  localStorage.setItem("token", tokenData)
-  setUser(userData)
-  setToken(tokenData)
-  navigate("/feed")
-}
+    console.log("AuthProvider: Saving login data to localStorage");
+    console.log("AuthProvider: userData =", { username: userData.username, email: userData.email });
+    console.log("AuthProvider: tokenData =", tokenData ? "present" : "missing");
+    
+    try {
+      localStorage.setItem("user", JSON.stringify(userData))
+      localStorage.setItem("token", tokenData)
+      console.log("AuthProvider: Data saved to localStorage successfully");
+      
+      // Verify it was saved
+      const verifyUser = localStorage.getItem("user");
+      const verifyToken = localStorage.getItem("token");
+      console.log("AuthProvider: Verification - user saved:", !!verifyUser, "token saved:", !!verifyToken);
+    } catch (e) {
+      console.error("AuthProvider: Failed to save to localStorage:", e);
+    }
+    
+    setUser(userData)
+    setToken(tokenData)
+    navigate("/feed")
+  }
 
 const logout = ()=>{
+  console.log("AuthProvider: Logging out and clearing localStorage");
   localStorage.removeItem("user")
   localStorage.removeItem("token")
   setUser(null)
@@ -38,11 +81,16 @@ const logout = ()=>{
 }
 
 const authFetch = async (url, options = {}) => {
+    // Get fresh token from localStorage instead of closure
+    const currentToken = localStorage.getItem("token");
+    if (!currentToken) {
+      console.warn("AuthProvider: No token found for request to", url);
+    }
     const res = await fetch(`http://localhost:8000${url}`, {
       ...options,
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
+        Authorization: `Bearer ${currentToken}`,
         ...options.headers,
       },
     })
@@ -50,7 +98,7 @@ const authFetch = async (url, options = {}) => {
   }
 
   return(
-    <AuthContext.Provider value={{ user, token, login, logout, authFetch }}>
+    <AuthContext.Provider value={{ user, token, loading, login, logout, authFetch }}>
       {children}
     </AuthContext.Provider>
   )
