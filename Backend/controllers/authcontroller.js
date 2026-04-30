@@ -90,7 +90,12 @@ export const login = async (req, res) => {
 
 export const forgotPassword = async (req, res) => {
   try {
-    const { email } = req.body
+    const email = req.body.email?.trim().toLowerCase()
+
+    if (!email) {
+      return res.status(400).json({ message: "Email is required" })
+    }
+
     const user = await User.findOne({ email })
     if (!user) {
       return res.status(404).json({ message: "User not found" })
@@ -98,11 +103,12 @@ export const forgotPassword = async (req, res) => {
     //generate reset token 
     const resetToken = crypto.randomBytes(20).toString("hex")
     user.resetPasswordToken = crypto.createHash("sha256").update(resetToken).digest("hex")
-    user.resetPasswordExpire = Date.now() + 3600000 //1 hour
+    user.resetPasswordExpire = Date.now() + 15 * 60 * 1000
 
     await user.save({ validateBeforeSave: false })
 
-    const resetUrl = `${process.env.CLIENT_URL}/reset-password/${resetToken}`
+    const clientUrl = process.env.CLIENT_URL || process.env.FRONTEND_URL || "http://localhost:5173"
+    const resetUrl = `${clientUrl}/reset-password/${resetToken}`
 
     await sendEmail({
       to: user.email,
@@ -129,6 +135,10 @@ export const forgotPassword = async (req, res) => {
 
 export const resetPassword = async (req, res) => {
   try {
+    if (!req.body.password || req.body.password.length < 6) {
+      return res.status(400).json({ message: "Password must be at least 6 characters" })
+    }
+
     const hashedToken = crypto
       .createHash("sha256")
       .update(req.params.token)
