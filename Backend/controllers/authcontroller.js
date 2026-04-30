@@ -9,22 +9,26 @@ import crypto from "crypto"
 export const registerUser = async (req,res)=>{
    
   try {
-     const { username, name, email, password } = req.body;
-     const userNameValue = username || name
+     const { username, name, email, password, roles = [] } = req.body;
+     const userNameValue = (username || name || "").trim().toLowerCase()
   //validate input and fields
   if(!userNameValue || !email || !password){
     return res.status(400).json({message: "Please fill all fields"})
   }
   //check if user exists
-  const userExists = await User.findOne({ email })
+  const userExists = await User.findOne({
+    $or: [{ email: email.trim().toLowerCase() }, { username: userNameValue }],
+  })
   if(userExists){
-    return res.status(400).json({message: "User already exists"})
+    const field = userExists.email === email.trim().toLowerCase() ? "Email" : "Username"
+    return res.status(400).json({message: `${field} already exists`})
   }
   //create user
   const user = await User.create({
     username: userNameValue,
-    email,
+    email: email.trim().toLowerCase(),
     password,
+    roles,
   })
 
   return res.status(201).json({
@@ -36,6 +40,16 @@ export const registerUser = async (req,res)=>{
   })
 
   } catch (error) {
+    if (error.name === "ValidationError") {
+      const message = Object.values(error.errors).map((err) => err.message).join(", ")
+      return res.status(400).json({ message })
+    }
+
+    if (error.code === 11000) {
+      const field = Object.keys(error.keyPattern || error.keyValue || {})[0] || "User"
+      return res.status(400).json({ message: `${field} already exists` })
+    }
+
     return res.status(500).json({message: "Error creating user", error: error.message})
   }
 }

@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
 import Topbar from "../components/layout/Topbar";
 
 const Feed = () => {
+  const navigate = useNavigate();
   const { authFetch } = useAuth();
   const { addToast } = useToast();
   const [projects, setProjects] = useState([]);
@@ -50,12 +52,15 @@ const Feed = () => {
         throw new Error(data.message);
       }
 
+      // Update projects with the liked status from backend
       setProjects((prev) =>
         prev.map((p) =>
-          p._id === projectId ? { ...p, likes: [...(p.likes || []), { _id: "me" }] } : p
+          p._id === projectId 
+            ? { ...p, likes: new Array(data.likesCount || 0).fill(0) }
+            : p
         )
       );
-      addToast("Project liked!", "success");
+      addToast(data.liked ? "Project liked!" : "Project unliked!", "success");
     } catch (error) {
       addToast(error.message, "error");
     }
@@ -112,10 +117,10 @@ const Feed = () => {
           ) : (
             <div className="divide-y divide-white/10">
               {projects.map((project) => (
-                <a
+                <div
                   key={project._id}
-                  href={`/project/${project._id}`}
-                  className="block p-4 sm:p-6 hover:bg-white/5 transition border-b border-white/10"
+                  onClick={() => navigate(`/project/${project._id}`)}
+                  className="block p-4 sm:p-6 hover:bg-white/5 transition border-b border-white/10 cursor-pointer"
                 >
                   <div className="mb-2 sm:mb-3 flex items-start justify-between gap-2">
                     <div className="flex-1 min-w-0">
@@ -123,8 +128,14 @@ const Feed = () => {
                         {project.category}
                       </span>
                       <h3 className="text-sm sm:text-base font-medium text-white line-clamp-2">{project.title}</h3>
-                      <p className="mt-0.5 sm:mt-1 text-[11px] sm:text-xs text-white/40 truncate">
-                        by @{project.owner?.username || "unknown"}
+                      <p 
+                        className="mt-0.5 sm:mt-1 text-[11px] sm:text-xs text-white/40 truncate hover:text-[#7f77dd] transition cursor-pointer"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate(`/profile/${project.owner?.username}`);
+                        }}
+                      >
+                        by <span className="font-medium">@{project.owner?.username || "unknown"}</span>
                       </p>
                     </div>
                   </div>
@@ -147,8 +158,8 @@ const Feed = () => {
 
                   {/* Roles */}
                   <div className="mb-2 sm:mb-3 flex items-center gap-3 sm:gap-4 text-[11px] sm:text-xs text-white/40">
-                    <span>👥 {project.roles?.length || 0}</span>
-                    <span>💬 {project.spotsLeft || 0}</span>
+                    <span>{project.roles?.length || 0} roles</span>
+                    <span>{project.spotsLeft || 0} open spots</span>
                   </div>
 
                   {/* Actions */}
@@ -160,7 +171,7 @@ const Feed = () => {
                       }}
                       className="flex items-center gap-1 rounded-[6px] bg-white/5 px-2 sm:px-3 py-1 sm:py-1.5 text-[11px] sm:text-xs text-white/50 hover:bg-white/10"
                     >
-                      ❤️ {project.likes?.length || 0}
+                      Like {project.likes?.length || 0}
                     </button>
                     <button
                       onClick={(e) => {
@@ -169,16 +180,19 @@ const Feed = () => {
                       }}
                       className="flex items-center gap-1 rounded-[6px] bg-white/5 px-2 sm:px-3 py-1 sm:py-1.5 text-[11px] sm:text-xs text-white/50 hover:bg-white/10"
                     >
-                      📌
+                      Save
                     </button>
-                    <a
-                      href={`/project/${project._id}`}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigate(`/project/${project._id}`);
+                      }}
                       className="ml-auto rounded-[6px] bg-[#7f77dd] px-3 sm:px-4 py-1 sm:py-1.5 text-[11px] sm:text-xs font-medium text-white hover:bg-[#7f77dd]/90 whitespace-nowrap"
                     >
                       Join
-                    </a>
+                    </button>
                   </div>
-                </a>
+                </div>
               ))}
             </div>
           )}
@@ -210,10 +224,10 @@ const Feed = () => {
             <h4 className="text-[11px] lg:text-xs font-medium text-white/60 uppercase tracking-wider">Trending</h4>
             <div className="space-y-1.5 lg:space-y-2">
               <div className="rounded-[8px] bg-white/5 p-2 lg:p-3 text-xs lg:text-xs text-white/50 hover:bg-white/10 cursor-pointer">
-                🔥 Most Liked
+                Most Liked
               </div>
               <div className="rounded-[8px] bg-white/5 p-2 lg:p-3 text-xs lg:text-xs text-white/50 hover:bg-white/10 cursor-pointer">
-                ⭐ Featured
+                Featured
               </div>
             </div>
           </div>

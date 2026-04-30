@@ -2,6 +2,7 @@ import { NavLink, Link, useNavigate } from "react-router-dom";
 
 const menuItems = [
   { to: "/feed", label: "Feed", icon: FeedIcon },
+  { to: "/designs", label: "Designs", icon: DesignFilesIcon },
   { to: "/trending", label: "Trending", icon: TrendingIcon },
   { to: "/saved", label: "Saved", icon: SavedIcon },
   { to: "/my-projects", label: "My projects", icon: ProjectsIcon },
@@ -26,7 +27,7 @@ const Sidebar = ({ collapsed = false, setCollapsed, user, logout, notifCount = 0
 
   return (
     <aside
-      className={`flex min-h-screen flex-col border-r border-white/10 bg-[#0d0d14] transition-all duration-200 ${
+      className={`flex h-dvh min-h-0 flex-col overflow-hidden border-r border-white/10 bg-[#0d0d14] transition-all duration-200 ${
         isMobile ? "fixed inset-0 z-40" : "relative"
       } ${
         collapsed ? "w-[60px]" : "w-[220px]"
@@ -54,20 +55,22 @@ const Sidebar = ({ collapsed = false, setCollapsed, user, logout, notifCount = 0
         </button>
       ) : null}
 
-      <SidebarSection title="Menu" collapsed={collapsed} items={menuItems} />
-      <Divider />
-      <SidebarSection
-        title="Collaborate"
-        collapsed={collapsed}
-        items={collaborateItems.map((item) => ({
-          ...item,
-          badge: item.badgeKey === "notifCount" ? notifCount : item.badgeKey === "requestCount" ? requestCount : 0,
-        }))}
-      />
-      <Divider />
-      <SidebarSection title="Categories" collapsed={collapsed} items={categoryItems} />
+      <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain">
+        <SidebarSection title="Menu" collapsed={collapsed} items={menuItems} />
+        <Divider />
+        <SidebarSection
+          title="Collaborate"
+          collapsed={collapsed}
+          items={collaborateItems.map((item) => ({
+            ...item,
+            badge: item.badgeKey === "notifCount" ? notifCount : item.badgeKey === "requestCount" ? requestCount : 0,
+          }))}
+        />
+        <Divider />
+        <SidebarSection title="Categories" collapsed={collapsed} items={categoryItems} />
+      </div>
 
-      <div className="mt-auto border-t border-white/10 px-2 sm:px-3 py-[10px] sm:py-[14px] space-y-1.5 sm:space-y-2">
+      <div className="border-t border-white/10 px-2 sm:px-3 py-[10px] sm:py-[14px] space-y-1.5 sm:space-y-2">
         <Link
           to={`/profile/${user?.username}`}
           className={`flex items-center rounded-lg px-1.5 sm:px-2 py-1.5 sm:py-2 transition hover:bg-white/5 ${collapsed ? "justify-center" : "gap-2"}`}
@@ -260,6 +263,17 @@ function GameIcon({ className = iconClass }) {
   return (
     <svg viewBox="0 0 16 16" fill="none" className={className}>
       <path d="M2 12l4-4 3 3 5-6" stroke="currentColor" strokeWidth="1.3" />
+    </svg>
+  );
+}
+
+function DesignFilesIcon({ className = iconClass }) {
+  return (
+    <svg viewBox="0 0 16 16" fill="none" className={className}>
+      <rect x="2" y="2" width="6" height="6" rx="1" stroke="currentColor" strokeWidth="1.3" />
+      <rect x="9" y="2" width="5" height="5" rx="1" stroke="currentColor" strokeWidth="1.3" />
+      <rect x="2" y="9" width="5" height="5" rx="1" stroke="currentColor" strokeWidth="1.3" />
+      <path d="M10 10l-1 1 2 2 4-4" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }

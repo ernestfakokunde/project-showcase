@@ -25,6 +25,8 @@ const CATEGORY_MAP = {
   },
 };
 
+import ReportButton from '../ReportButton';
+
 const FeedCard = ({
   _id,
   title,
@@ -53,7 +55,7 @@ const FeedCard = ({
         <div className="flex-1">
           <div className="text-[13px] font-medium text-white">
             @{author?.username || "stacker"}
-            {author?.role ? <span className="text-[12px] font-normal text-white/30"> · {author.role}</span> : null}
+            {author?.role ? <span className="text-[12px] font-normal text-white/30"> ï¿½ {author.role}</span> : null}
           </div>
           <div className="text-[11px] text-white/30">{timeAgo}</div>
         </div>
@@ -90,12 +92,15 @@ const FeedCard = ({
           <Stat icon={<CommentIcon />} value={formatCount(commentsCount)} />
           <Stat icon={<ClockIcon />} value={spotsLeftLabel(spotsLeft)} />
         </div>
-        <button
-          type="button"
-          className="rounded-[7px] border border-[#7f77dd]/30 bg-[#7f77dd]/15 px-[14px] py-[5px] text-[11px] font-medium text-[#afa9ec]"
-        >
-          Request to join
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            className="rounded-[7px] border border-[#7f77dd]/30 bg-[#7f77dd]/15 px-[14px] py-[5px] text-[11px] font-medium text-[#afa9ec]"
+          >
+            Request to join
+          </button>
+          <ReportButton itemId={_id} itemType="project" />
+        </div>
       </div>
     </article>
   );

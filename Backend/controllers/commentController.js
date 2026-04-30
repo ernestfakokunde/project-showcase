@@ -1,6 +1,7 @@
 import Comment from "../models/commentModel.js";
 import { Project } from "../models/projectModel.js";
 import Notification from "../models/notificationModel.js";
+import { emitNotificationUpdate } from "../utils/realtime.js";
 
 // Add comment
 export const addComment = async (req, res) => {
@@ -33,6 +34,8 @@ export const addComment = async (req, res) => {
         project: projectId,
         comment: comment._id,
       });
+
+      emitNotificationUpdate(project.owner, { reason: "project_commented", projectId: projectId.toString() });
     }
 
     res.status(201).json({ message: "Comment added", comment });

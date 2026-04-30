@@ -1,4 +1,6 @@
 @import "tailwindcss";
+@import "./styles/admin.css";
+@import "./styles/report-modal.css";
 
 /* Hide scrollbar for all elements */
 * {

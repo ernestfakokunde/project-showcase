@@ -97,6 +97,22 @@ const Sidebar = ({ collapsed, setCollapsed, user }) => {
 
       <div style={styles.divider}/>
 
+      {/* Admin section */}
+      {user?.role === 'admin' && (
+        <div style={styles.section}>
+          {!collapsed && <p style={styles.sectionLabel}>Admin</p>}
+          <SidebarItem to="/admin" collapsed={collapsed} label="Admin Panel">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.3" width="15" height="15">
+              <circle cx="8" cy="4" r="2.5"/>
+              <path d="M3 13c0-2 2-3 5-3s5 1 5 3"/>
+              <rect x="2" y="1" width="12" height="14" rx="1.5"/>
+            </svg>
+          </SidebarItem>
+        </div>
+      )}
+
+      <div style={styles.divider}/>
+
       {/* Categories section */}
       <div style={styles.section}>
         {!collapsed && <p style={styles.sectionLabel}>Categories</p>}

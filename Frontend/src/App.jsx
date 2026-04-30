@@ -2,6 +2,8 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import LandingPage from "./pages/LandingPage";
 import PublicLayout from "./layout/PublicLayout";
 import Feed from "./pages/Feed";
+import DesignsFeed from "./pages/DesignsFeed";
+import DesignDetail from "./pages/DesignDetail";
 import Signup from "./pages/Signup";
 import Login from "./pages/Login";
 import Profile from "./pages/Profile";
@@ -12,11 +14,13 @@ import Trending from "./pages/Trending";
 import Saved from "./pages/Saved";
 import MyProjects from "./pages/MyProjects";
 import Messages from "./pages/Messages";
+import AdminPanel from "./pages/AdminPanel";
 import AppLayout from "./layout/AppLayout";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import ProjectDetail from "./pages/ProjectDetail";
 import ProjectModal from "./components/modals/ProjectModal";
+import DesignModal from "./components/modals/DesignModal";
 import Toast from "./components/Toast";
 import { useAuth } from "./context/AuthContext";
 import { useApp } from "./context/AppContext";
@@ -32,12 +36,9 @@ const ProtectedRoute = ({ children }) => {
     
     const { token, loading } = auth;
     
-    console.log("ProtectedRoute: loading=", loading, "token=", !!token);
-    
     if (loading) return <div className="min-h-screen bg-[#09090e]" />;
     
     if (!token) {
-      console.log("ProtectedRoute: No token, redirecting to login");
       return <Navigate to="/login" replace />;
     }
     
@@ -48,17 +49,34 @@ const ProtectedRoute = ({ children }) => {
   }
 };
 
+const AdminRoute = () => {
+  const { user, token, loading } = useAuth();
+
+  if (loading) return <div className="min-h-screen bg-[#09090e]" />;
+
+  if (!token) {
+    return <Navigate to="/login" replace />;
+  }
+
+  if (user?.role !== "admin") {
+    return <Navigate to="/feed" replace />;
+  }
+
+  return <AdminPanel />;
+};
+
 const MyProfileRedirect = () => {
   const { user } = useAuth();
   return user ? <Navigate to={`/profile/${user.username}`} replace /> : <Navigate to="/feed" replace />;
 };
 
 function App() {
-  const { showProjectModal } = useApp();
+  const { showProjectModal, showDesignModal } = useApp();
 
   return (
     <>
       {showProjectModal && <ProjectModal />}
+      {showDesignModal && <DesignModal />}
       <Toast />
       <Routes>
       <Route path="/" element={<PublicLayout />}>
@@ -78,6 +96,8 @@ function App() {
         }
       >
         <Route path="feed" element={<Feed />} />
+        <Route path="designs" element={<DesignsFeed />} />
+        <Route path="design/:id" element={<DesignDetail />} />
         <Route path="search" element={<Search />} />
         <Route path="profile" element={<MyProfileRedirect />} />
         <Route path="profile/:username" element={<Profile />} />
@@ -89,6 +109,8 @@ function App() {
         <Route path="my-projects" element={<MyProjects />} />
         <Route path="messages" element={<Messages />} />
       </Route>
+
+      <Route path="/admin" element={<AdminRoute />} />
 
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

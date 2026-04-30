@@ -14,6 +14,7 @@ const Profile = () => {
   const { addToast } = useToast();
   const [user, setUser] = useState(null);
   const [projects, setProjects] = useState([]);
+  const [designs, setDesigns] = useState([]);
   const [collaborations, setCollaborations] = useState([]);
   const [likedProjects, setLikedProjects] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -38,6 +39,13 @@ const Profile = () => {
         setProjects(data.projects || []);
         setCollaborations(data.collaborations || []);
         setLikedProjects(data.likedProjects || []);
+
+        // Fetch designs for this user
+        const designRes = await authFetch(`/api/designs/user/${data.user._id}`);
+        const designData = await designRes.json();
+        if (designRes.ok) {
+          setDesigns(designData.designs || []);
+        }
       } catch (err) {
         setError(err.message);
       } finally {
@@ -53,15 +61,17 @@ const Profile = () => {
   const stats = useMemo(
     () => ({
       projects: projects.length,
+      designs: designs.length,
       followers: user?.followers?.length || 0,
       following: user?.following?.length || 0,
       collabs: collaborations.length,
     }),
-    [projects, collaborations, user]
+    [projects, designs, collaborations, user]
   );
 
   const tabItems = [
     { label: `Projects (${projects.length})`, key: "Projects" },
+    { label: `Designs (${designs.length})`, key: "Designs" },
     { label: `Collaborations (${collaborations.length})`, key: "Collaborations" },
     { label: `Liked (${likedProjects.length})`, key: "Liked" },
   ];
@@ -77,9 +87,10 @@ const Profile = () => {
         const data = await res.json();
         setUser((prev) => ({
           ...prev,
-          followers: prev.followers.some((f) => f._id === currentUser._id)
-            ? prev.followers.filter((f) => f._id !== currentUser._id)
-            : [...prev.followers, currentUser],
+          followers:
+            data.isFollowing
+              ? [...(prev.followers || []), currentUser._id]
+              : (prev.followers || []).filter((f) => (f?._id || f).toString() !== currentUser._id.toString()),
         }));
       }
     } catch (err) {
@@ -125,7 +136,7 @@ const Profile = () => {
     return <div className="min-h-screen bg-[#09090e] flex items-center justify-center text-white/50">User not found</div>;
   }
 
-  const currentProjects = internalTab === "Collaborations" ? collaborations : internalTab === "Liked" ? likedProjects : projects;
+  const currentProjects = internalTab === "Designs" ? designs : internalTab === "Collaborations" ? collaborations : internalTab === "Liked" ? likedProjects : projects;
 
   return (
     <main className="min-h-screen bg-[#09090e] text-white">
@@ -139,15 +150,15 @@ const Profile = () => {
         onEdit={() => setShowEditModal(true)}
       />
 
-      <div className="flex gap-5 px-8 py-5">
+      <div className="flex flex-col lg:flex-row gap-5 px-4 sm:px-6 lg:px-8 py-5">
         <div className="flex-1">
-          <div className="mb-5 flex border-b border-white/10">
+          <div className="mb-5 flex overflow-x-auto border-b border-white/10">
             {tabItems.map((tab) => (
               <button
                 key={tab.key}
                 type="button"
                 onClick={() => handleTabChange(tab.key)}
-                className={`-mb-px px-4 py-2 text-[13px] ${
+                className={`-mb-px shrink-0 px-3 sm:px-4 py-2 text-[12px] sm:text-[13px] ${
                   internalTab === tab.key ? "border-b-2 border-[#7f77dd] text-[#afa9ec]" : "text-white/35"
                 }`}
               >
@@ -159,7 +170,9 @@ const Profile = () => {
           <ProjectGrid projects={currentProjects} />
         </div>
 
-        <ProfileSidebar skills={user?.skills || []} experience={user?.experience || []} activity={user?.activity || []} />
+        <div className="lg:w-[260px] lg:shrink-0">
+          <ProfileSidebar skills={user?.skills || []} experience={user?.experience || []} activity={user?.activity || []} />
+        </div>
       </div>
 
       <ProfileEditModal 

@@ -18,12 +18,14 @@ router.post("/login", login);
 router.post("/forgot-password", forgotPassword);
 router.put("/reset-password/:token", resetPassword);
 
-// Protected routes
+// Protected routes - specific routes FIRST
 router.get("/me", protect, getCurrentUser);
 router.get("/suggested", protect, getSuggestedUsers);
 router.get("/search", protect, searchUsers);
 router.put("/profile", protect, updateProfile);
-router.get("/:username", protect, getUserProfile);
 router.put("/:id/follow", protect, toggleFollow);
+
+// Generic routes - LAST (catch-all)
+router.get("/:username", protect, getUserProfile);
 
 export default router;

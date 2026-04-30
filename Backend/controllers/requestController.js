@@ -2,6 +2,7 @@ import Request from "../models/requestModel.js";
 import { Project } from "../models/projectModel.js";
 import User from "../models/userModel.js";
 import Notification from "../models/notificationModel.js";
+import { emitNotificationUpdate, emitRequestUpdate } from "../utils/realtime.js";
 
 // Send join request
 export const sendRequest = async (req, res) => {
@@ -51,8 +52,16 @@ export const sendRequest = async (req, res) => {
       request: request._id,
     });
 
+    emitNotificationUpdate(project.owner, { reason: "join_request", requestId: request._id.toString() });
+    emitRequestUpdate(project.owner, { reason: "incoming_request", requestId: request._id.toString() });
+    emitRequestUpdate(req.user._id, { reason: "sent_request", requestId: request._id.toString() });
+
     res.status(201).json({ message: "Request sent successfully", request });
   } catch (error) {
+    if (error?.code === 11000) {
+      return res.status(400).json({ message: "You have already requested to join this project" });
+    }
+
     res.status(500).json({ message: "Error sending request", error: error.message });
   }
 };
@@ -64,11 +73,12 @@ export const getIncomingRequests = async (req, res) => {
     const skip = (page - 1) * limit;
 
     const requests = await Request.find({ owner: req.user._id })
-      .populate("from", "username avatar roles skills bio links")
+      .populate("from", "username avatar roles bio links email")
       .populate("project", "title category")
       .sort("-createdAt")
       .skip(skip)
-      .limit(parseInt(limit));
+      .limit(parseInt(limit))
+      .lean();
 
     const total = await Request.countDocuments({ owner: req.user._id });
 
@@ -77,7 +87,8 @@ export const getIncomingRequests = async (req, res) => {
       pagination: { total, page: parseInt(page), limit: parseInt(limit), pages: Math.ceil(total / limit) },
     });
   } catch (error) {
-    res.status(500).json({ message: "Error fetching requests", error: error.message });
+    console.error("Error fetching incoming requests:", error);
+    res.status(500).json({ message: error.message || "Error fetching requests", error: error.message });
   }
 };
 
@@ -92,7 +103,8 @@ export const getSentRequests = async (req, res) => {
       .populate("owner", "username avatar")
       .sort("-createdAt")
       .skip(skip)
-      .limit(parseInt(limit));
+      .limit(parseInt(limit))
+      .lean();
 
     const total = await Request.countDocuments({ from: req.user._id });
 
@@ -101,7 +113,8 @@ export const getSentRequests = async (req, res) => {
       pagination: { total, page: parseInt(page), limit: parseInt(limit), pages: Math.ceil(total / limit) },
     });
   } catch (error) {
-    res.status(500).json({ message: "Error fetching sent requests", error: error.message });
+    console.error("Error fetching sent requests:", error);
+    res.status(500).json({ message: error.message || "Error fetching sent requests", error: error.message });
   }
 };
 
@@ -142,6 +155,10 @@ export const acceptRequest = async (req, res) => {
       request: request._id,
     });
 
+    emitNotificationUpdate(request.from, { reason: "request_accepted", requestId: request._id.toString() });
+    emitRequestUpdate(request.from, { reason: "sent_request_updated", requestId: request._id.toString() });
+    emitRequestUpdate(request.owner, { reason: "incoming_request_updated", requestId: request._id.toString() });
+
     res.json({ message: "Request accepted", request });
   } catch (error) {
     res.status(500).json({ message: "Error accepting request", error: error.message });
@@ -178,6 +195,10 @@ export const declineRequest = async (req, res) => {
       request: request._id,
     });
 
+    emitNotificationUpdate(request.from, { reason: "request_declined", requestId: request._id.toString() });
+    emitRequestUpdate(request.from, { reason: "sent_request_updated", requestId: request._id.toString() });
+    emitRequestUpdate(request.owner, { reason: "incoming_request_updated", requestId: request._id.toString() });
+
     res.json({ message: "Request declined", request });
   } catch (error) {
     res.status(500).json({ message: "Error declining request", error: error.message });
@@ -198,7 +219,12 @@ export const cancelRequest = async (req, res) => {
       return res.status(403).json({ message: "Not authorized to cancel this request" });
     }
 
+    const ownerId = request.owner;
+
     await Request.findByIdAndDelete(req.params.id);
+
+    emitRequestUpdate(req.user._id, { reason: "sent_request_cancelled", requestId: request._id.toString() });
+    emitRequestUpdate(ownerId, { reason: "incoming_request_cancelled", requestId: request._id.toString() });
 
     res.json({ message: "Request cancelled" });
   } catch (error) {

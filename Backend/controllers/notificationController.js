@@ -1,4 +1,5 @@
 import Notification from "../models/notificationModel.js";
+import { emitNotificationUpdate } from "../utils/realtime.js";
 
 // Get all notifications for user
 export const getNotifications = async (req, res) => {
@@ -9,11 +10,10 @@ export const getNotifications = async (req, res) => {
     const notifications = await Notification.find({ to: req.user._id })
       .populate("from", "username avatar")
       .populate("project", "title category")
-      .populate("request")
-      .populate("comment")
       .sort("-createdAt")
       .skip(skip)
-      .limit(parseInt(limit));
+      .limit(parseInt(limit))
+      .lean();
 
     const total = await Notification.countDocuments({ to: req.user._id });
 
@@ -22,7 +22,8 @@ export const getNotifications = async (req, res) => {
       pagination: { total, page: parseInt(page), limit: parseInt(limit), pages: Math.ceil(total / limit) },
     });
   } catch (error) {
-    res.status(500).json({ message: "Error fetching notifications", error: error.message });
+    console.error("Error fetching notifications:", error);
+    res.status(500).json({ message: error.message || "Error fetching notifications", error: error.message });
   }
 };
 
@@ -52,6 +53,8 @@ export const markAsRead = async (req, res) => {
     notification.read = true;
     await notification.save();
 
+    emitNotificationUpdate(req.user._id, { reason: "notification_read", notificationId: notification._id.toString() });
+
     res.json({ message: "Marked as read", notification });
   } catch (error) {
     res.status(500).json({ message: "Error marking as read", error: error.message });
@@ -62,6 +65,7 @@ export const markAsRead = async (req, res) => {
 export const markAllAsRead = async (req, res) => {
   try {
     await Notification.updateMany({ to: req.user._id, read: false }, { read: true });
+    emitNotificationUpdate(req.user._id, { reason: "notifications_read_all" });
     res.json({ message: "All notifications marked as read" });
   } catch (error) {
     res.status(500).json({ message: "Error marking all as read", error: error.message });
@@ -82,6 +86,8 @@ export const deleteNotification = async (req, res) => {
     }
 
     await Notification.findByIdAndDelete(req.params.id);
+
+    emitNotificationUpdate(req.user._id, { reason: "notification_deleted", notificationId: notification._id.toString() });
 
     res.json({ message: "Notification deleted" });
   } catch (error) {

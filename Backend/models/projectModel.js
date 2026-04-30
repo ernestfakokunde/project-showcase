@@ -108,6 +108,23 @@ const projectSchema = new mongoose.Schema({
     type: Boolean,
     default: true,
   },
+  // Auto-flagging system
+  flags: {
+    type: [{
+      reason: String,
+      flaggedAt: { type: Date, default: Date.now },
+    }],
+    default: [],
+  },
+  flagLevel: {
+    type: String,
+    enum: ["low", "medium", "high", "none"],
+    default: "none",
+  },
+  isFlagged: {
+    type: Boolean,
+    default: false,
+  },
 }, { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } })
 
 

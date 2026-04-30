@@ -12,6 +12,7 @@ export const AuthProvider = ({ children }) => {
   //on app load check if user is logged in
   useEffect(() =>{
     console.log("AuthProvider: Checking localStorage for existing session");
+    let cancelled = false;
     
     // Test if localStorage works
     try {
@@ -30,13 +31,32 @@ export const AuthProvider = ({ children }) => {
 
     console.log("AuthProvider: storedUser=", !!storedUser, "storedToken=", !!storedToken);
 
+    const restoreSession = async () => {
     if (storedUser && storedToken) {
       try {
         const parsedUser = JSON.parse(storedUser);
         console.log("AuthProvider: Parsed user:", { username: parsedUser.username, email: parsedUser.email });
-        setUser(parsedUser)
-        setToken(storedToken)
-        console.log("AuthProvider: Session restored from localStorage");
+        let freshUser = parsedUser;
+
+        try {
+          const res = await fetch("http://localhost:8000/api/users/me", {
+            headers: { Authorization: `Bearer ${storedToken}` },
+          });
+          const data = await res.json();
+
+          if (res.ok && data.user) {
+            freshUser = data.user;
+            localStorage.setItem("user", JSON.stringify(freshUser));
+          }
+        } catch (error) {
+          console.warn("AuthProvider: Could not refresh current user:", error.message);
+        }
+
+        if (!cancelled) {
+          setUser(freshUser)
+          setToken(storedToken)
+          console.log("AuthProvider: Session restored from localStorage");
+        }
       } catch (e) {
         console.error("AuthProvider: Failed to parse stored user:", e);
         localStorage.removeItem("user");
@@ -45,7 +65,16 @@ export const AuthProvider = ({ children }) => {
     } else {
       console.log("AuthProvider: No session found in localStorage");
     }
-    setLoading(false)
+    if (!cancelled) {
+      setLoading(false)
+    }
+    };
+
+    restoreSession();
+
+    return () => {
+      cancelled = true;
+    };
   }, [])
 
   const login = (userData, tokenData)=>{

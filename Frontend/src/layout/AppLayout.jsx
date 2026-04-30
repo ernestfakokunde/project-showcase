@@ -7,15 +7,18 @@ import { useApp } from "../context/AppContext";
 const AppLayout = () => {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const { user, logout } = useAuth();
-  const { notifCount, requestCount, sidebarCollapsed, toggleSidebar } = useApp();
+  const {
+    notifCount,
+    requestCount,
+    sidebarCollapsed,
+    toggleSidebar,
+  } = useApp();
 
   // Handle responsive sidebar collapse
   useEffect(() => {
     const handleResize = () => {
       const mobile = window.innerWidth < 768;
       setIsMobile(mobile);
-      // Auto-collapse sidebar on mobile
-      // Note: This is handled by AppContext's initial state
     };
 
     window.addEventListener("resize", handleResize);
@@ -23,9 +26,9 @@ const AppLayout = () => {
   }, []);
 
   return (
-    <div className="flex min-h-screen bg-[#09090e]">
+    <div className="flex h-dvh overflow-hidden bg-[#09090e]">
       {/* Sidebar - Hidden on mobile when collapsed */}
-      <div className={`${isMobile ? "hidden" : ""}`}>
+      <div className={`${isMobile ? "hidden" : ""} shrink-0`}>
         <Sidebar 
           collapsed={sidebarCollapsed} 
           setCollapsed={toggleSidebar} 
@@ -57,7 +60,7 @@ const AppLayout = () => {
       )}
       
       {/* Main Content */}
-      <div className="flex min-h-screen flex-1 flex-col w-full">
+      <div className="flex h-dvh min-h-0 flex-1 flex-col w-full">
         <div className="flex-1 overflow-y-auto">
           <Outlet />
         </div>

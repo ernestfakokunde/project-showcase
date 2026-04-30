@@ -23,6 +23,9 @@ const ProjectDetail = () => {
   const [phone, setPhone] = useState("");
   const [socials, setSocials] = useState({ github: "", linkedin: "", portfolio: "", twitter: "" });
   const [showPitchModal, setShowPitchModal] = useState(false);
+  const [isFollowing, setIsFollowing] = useState(false);
+  const [liked, setLiked] = useState(false);
+  const [requestStatus, setRequestStatus] = useState(null);
 
   useEffect(() => {
     fetchProject();
@@ -53,6 +56,15 @@ const ProjectDetail = () => {
 
       console.log("Project fetched successfully:", data.project);
       setProject(data.project);
+      setRequestStatus(data.requestStatus || null);
+      if (user && data.project?.likes) {
+        setLiked(data.project.likes.some((id) => (id?._id || id).toString() === user._id.toString()));
+      }
+      
+      // Check if current user is following the project owner
+      if (user && data.project.owner?.followers) {
+        setIsFollowing(data.project.owner.followers.some(id => id.toString() === user._id.toString()));
+      }
     } catch (error) {
       console.error("Error fetching project:", error);
       setError(error.message || "Failed to load project");
@@ -102,6 +114,12 @@ const ProjectDetail = () => {
   };
 
   const handleSendPitch = async () => {
+    if (requestStatus) {
+      const statusLabel = requestStatus === "pending" ? "already sent" : requestStatus;
+      addToast(`You have ${statusLabel} a request for this project`, "error");
+      return;
+    }
+
     if (!pitchText.trim()) {
       addToast("Please write a pitch message", "error");
       return;
@@ -124,7 +142,7 @@ const ProjectDetail = () => {
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data.message);
+        throw new Error(data.message || data.error || "Failed to send pitch");
       }
 
       setShowPitchModal(false);
@@ -133,7 +151,74 @@ const ProjectDetail = () => {
       setEmail("");
       setPhone("");
       setSocials({ github: "", linkedin: "", portfolio: "", twitter: "" });
-      addToast("Pitch sent! Waiting for owner approval.", "success");
+      setRequestStatus("pending");
+      addToast("Request sent", "success");
+    } catch (error) {
+      addToast(error.message || "Failed to send pitch", "error");
+    }
+  };
+
+  const handleOpenPitchModal = () => {
+    if (requestStatus === "pending") {
+      addToast("You already sent a pitch for this project", "error");
+      return;
+    }
+
+    if (requestStatus === "accepted") {
+      addToast("Your request was already accepted for this project", "success");
+      return;
+    }
+
+    if (requestStatus === "declined") {
+      addToast("Your earlier request for this project was declined", "error");
+      return;
+    }
+
+    setShowPitchModal(true);
+  };
+
+  const handleFollowOwner = async () => {
+    if (!user) {
+      navigate("/login");
+      return;
+    }
+
+    try {
+      console.log(`[Follow Project] Starting follow request for user ${project.owner._id}`);
+      const res = await authFetch(`/api/users/${project.owner._id}/follow`, {
+        method: "PUT",
+      });
+      
+      console.log(`[Follow Project] Response status:`, res.status, res.ok);
+      const data = await res.json();
+      console.log(`[Follow Project] Response data:`, data);
+
+      if (res.ok) {
+        console.log(`[Follow Project] Success! IsFollowing =`, data.isFollowing);
+        setIsFollowing(data.isFollowing);
+        addToast(data.isFollowing ? "Following creator!" : "Unfollowed creator", "success");
+      } else {
+        console.error(`[Follow Project] Error response:`, data);
+        addToast(data.message || "Error following creator", "error");
+      }
+    } catch (error) {
+      console.error(`[Follow Project] Catch error:`, error);
+      addToast(error.message || "Error following creator", "error");
+    }
+  };
+
+  const handleLikeProject = async () => {
+    try {
+      const res = await authFetch(`/api/projects/${id}/like`, { method: "PUT" });
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message || "Failed to update like");
+      }
+
+      setLiked(data.liked);
+      setProject((prev) => (prev ? { ...prev, likes: new Array(data.likesCount || 0).fill(0) } : prev));
+      addToast(data.liked ? "Project liked!" : "Project unliked!", "success");
     } catch (error) {
       addToast(error.message, "error");
     }
@@ -168,6 +253,14 @@ const ProjectDetail = () => {
 
   // Check if current user is the owner
   const isOwner = user && project.owner && user._id === project.owner._id;
+  const pitchButtonLabel =
+    requestStatus === "pending"
+      ? "Pitch Sent"
+      : requestStatus === "accepted"
+        ? "Accepted"
+        : requestStatus === "declined"
+          ? "Declined"
+          : "Send Pitch";
   console.log("ProjectDetail: isOwner =", isOwner, { userID: user?._id, ownerID: project.owner?._id });
 
   return (
@@ -197,25 +290,51 @@ const ProjectDetail = () => {
                 {project.category}
               </span>
               <h1 className="text-2xl sm:text-3xl font-medium text-white">{project.title}</h1>
-              <p className="mt-2 text-sm text-white/40">
-                Posted by @{project.owner?.username || "owner"}
+              <p 
+                className="mt-2 text-sm text-white/40 hover:text-[#7f77dd] transition cursor-pointer"
+                onClick={() => navigate(`/profile/${project.owner?.username}`)}
+              >
+                Posted by <span className="font-medium">@{project.owner?.username || "owner"}</span>
               </p>
             </div>
             <div className="flex gap-2 flex-shrink-0 flex-col sm:flex-row w-full sm:w-auto">
-              <button className="rounded-[8px] border border-white/10 bg-white/5 px-4 py-2 text-sm text-white/50 hover:bg-white/10">
-                ❤️ Like
+              <button
+                onClick={handleLikeProject}
+                className={`rounded-[8px] border px-4 py-2 text-sm transition ${
+                  liked
+                    ? "border-[#7f77dd]/40 bg-[#7f77dd]/15 text-[#afa9ec]"
+                    : "border-white/10 bg-white/5 text-white/50 hover:bg-white/10"
+                }`}
+              >
+                Like {project.likes?.length || 0}
               </button>
               {user && project.owner && user._id === project.owner._id ? (
                 <div className="rounded-[8px] bg-white/5 px-6 py-2 text-sm font-medium text-white/50">
                   You're the owner
                 </div>
               ) : (
-                <button
-                  className="rounded-[8px] bg-[#7f77dd] px-6 py-2 text-sm font-medium text-white hover:bg-[#7f77dd]/90"
-                  onClick={() => setShowPitchModal(true)}
-                >
-                  Send Pitch
-                </button>
+                <>
+                  <button
+                    onClick={handleFollowOwner}
+                    className={`rounded-[8px] px-4 py-2 text-sm font-medium transition ${
+                      isFollowing
+                        ? "border border-white/10 bg-white/5 text-white/50 hover:bg-white/10"
+                        : "bg-white/10 text-white/60 hover:bg-white/20"
+                    }`}
+                  >
+                    {isFollowing ? "Following" : "Follow"}
+                  </button>
+                  <button
+                    className={`rounded-[8px] px-6 py-2 text-sm font-medium text-white ${
+                      requestStatus
+                        ? "bg-white/10 text-white/50 hover:bg-white/10"
+                        : "bg-[#7f77dd] hover:bg-[#7f77dd]/90"
+                    }`}
+                    onClick={handleOpenPitchModal}
+                  >
+                    {pitchButtonLabel}
+                  </button>
+                </>
               )}
             </div>
           </div>
@@ -430,3 +549,6 @@ const ProjectDetail = () => {
 };
 
 export default ProjectDetail;
+
+
+

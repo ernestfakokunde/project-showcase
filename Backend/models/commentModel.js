@@ -17,6 +17,14 @@ const commentSchema = new mongoose.Schema(
       required: [true, "Comment text is required"],
       maxlength: 500,
     },
+    isApproved: {
+      type: Boolean,
+      default: true,
+    },
+    rejectionReason: {
+      type: String,
+      default: null,
+    },
   },
   { timestamps: true }
 );

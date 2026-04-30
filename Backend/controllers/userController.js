@@ -2,6 +2,7 @@ import User from "../models/userModel.js";
 import { Project } from "../models/projectModel.js";
 import Request from "../models/requestModel.js";
 import Notification from "../models/notificationModel.js";
+import { emitNotificationUpdate } from "../utils/realtime.js";
 
 // Get user profile
 export const getUserProfile = async (req, res) => {
@@ -79,7 +80,7 @@ export const updateProfile = async (req, res) => {
 // Toggle follow
 export const toggleFollow = async (req, res) => {
   try {
-    const { userId } = req.params;
+    const userId = req.params.id;
 
     if (userId === req.user._id.toString()) {
       return res.status(400).json({ message: "Cannot follow yourself" });
@@ -93,6 +94,7 @@ export const toggleFollow = async (req, res) => {
     const currentUser = await User.findById(req.user._id);
 
     const followIndex = currentUser.following.findIndex((id) => id.toString() === userId);
+    let isFollowing = false;
 
     if (followIndex > -1) {
       // Unfollow
@@ -101,10 +103,12 @@ export const toggleFollow = async (req, res) => {
         userToFollow.followers.findIndex((id) => id.toString() === req.user._id.toString()),
         1
       );
+      isFollowing = false;
     } else {
       // Follow
       currentUser.following.push(userId);
       userToFollow.followers.push(req.user._id);
+      isFollowing = true;
 
       // Create notification
       await Notification.create({
@@ -112,12 +116,18 @@ export const toggleFollow = async (req, res) => {
         from: req.user._id,
         type: "follow",
       });
+
+      emitNotificationUpdate(userId, { reason: "new_follower", fromUserId: req.user._id.toString() });
     }
 
     await currentUser.save();
     await userToFollow.save();
 
-    res.json({ message: followIndex > -1 ? "Unfollowed" : "Followed" });
+    res.json({ 
+      message: isFollowing ? "Followed" : "Unfollowed",
+      isFollowing,
+      user: userToFollow
+    });
   } catch (error) {
     res.status(500).json({ message: "Error toggling follow", error: error.message });
   }
