@@ -17,7 +17,7 @@ const MyProjects = () => {
   const fetchMyProjects = async () => {
     try {
       setLoading(true);
-      const url = `/api/projects/my?page=${page}&limit=10`;
+      const url = `/projects/my?page=${page}&limit=10`;
 
       const res = await authFetch(url);
       const data = await res.json();

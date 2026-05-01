@@ -63,7 +63,7 @@ const Notifications = () => {
         setLoading(true);
       }
 
-      const res = await authFetch("/api/notifications");
+      const res = await authFetch("/notifications");
       const data = await res.json();
 
       if (!res.ok) {
@@ -111,7 +111,7 @@ const Notifications = () => {
 
   const handleMarkAllRead = async () => {
     try {
-      const res = await authFetch("/api/notifications/read-all", { method: "PUT" });
+      const res = await authFetch("/notifications/read-all", { method: "PUT" });
       const data = await res.json();
 
       if (!res.ok) {

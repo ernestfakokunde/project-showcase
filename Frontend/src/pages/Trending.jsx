@@ -19,7 +19,7 @@ const Trending = () => {
   const fetchTrending = async () => {
     try {
       setLoading(true);
-      const res = await authFetch("/api/projects/trending?limit=30");
+      const res = await authFetch("/projects/trending?limit=30");
       const data = await res.json();
 
       if (!res.ok) {

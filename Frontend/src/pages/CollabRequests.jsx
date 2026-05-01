@@ -66,7 +66,7 @@ const CollabRequests = () => {
         setLoading(true);
       }
 
-      const endpoint = activeTab === "incoming" ? "/api/requests/incoming" : "/api/requests/sent";
+      const endpoint = activeTab === "incoming" ? "/requests/incoming" : "/requests/sent";
       const res = await authFetch(endpoint);
       const data = await res.json();
 

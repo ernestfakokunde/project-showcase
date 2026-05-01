@@ -93,7 +93,7 @@ const ProjectDetail = () => {
     if (!commentText.trim()) return;
 
     try {
-      const res = await authFetch("/api/comments", {
+      const res = await authFetch("/comments", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ projectId: id, text: commentText }),
@@ -126,7 +126,7 @@ const ProjectDetail = () => {
     }
 
     try {
-      const res = await authFetch("/api/requests", {
+      const res = await authFetch("/requests", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

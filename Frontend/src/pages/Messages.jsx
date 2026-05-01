@@ -34,7 +34,7 @@ const Messages = () => {
   const fetchConversations = async () => {
     try {
       setConversationsLoading(true);
-      const res = await authFetch("/api/messages/conversations");
+      const res = await authFetch("/messages/conversations");
       const data = await res.json();
 
       if (!res.ok) throw new Error(data.message);
@@ -75,7 +75,7 @@ const Messages = () => {
     }
 
     try {
-      const res = await authFetch("/api/messages", {
+      const res = await authFetch("/messages", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

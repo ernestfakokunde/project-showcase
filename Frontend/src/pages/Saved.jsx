@@ -20,7 +20,7 @@ const Saved = () => {
   const fetchSavedProjects = async () => {
     try {
       setLoading(true);
-      let url = `/api/projects/saved?page=${page}&limit=10`;
+      let url = `/projects/saved?page=${page}&limit=10`;
       if (filterCategory !== "All") {
         url += `&category=${filterCategory}`;
       }

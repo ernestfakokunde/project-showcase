@@ -35,7 +35,7 @@ const Feed = () => {
   const fetchProjects = async () => {
     try {
       setLoading(true);
-      let url = `/api/projects?page=${page}&limit=12`;
+      let url = `/projects?page=${page}&limit=12`;
       if (activeFilter !== "All") {
         url += `&category=${encodeURIComponent(activeFilter)}`;
       }

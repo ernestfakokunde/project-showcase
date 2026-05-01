@@ -129,7 +129,7 @@ const Profile = () => {
 
   const openInviteModal = async () => {
     try {
-      const res = await authFetch("/api/projects/my?limit=50");
+      const res = await authFetch("/projects/my?limit=50");
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Failed to load your projects");
       setMyProjects(data.projects || []);
@@ -147,7 +147,7 @@ const Profile = () => {
     }
 
     try {
-      const res = await authFetch("/api/requests/invite", {
+      const res = await authFetch("/requests/invite", {
         method: "POST",
         body: JSON.stringify({
           projectId: inviteForm.projectId,
