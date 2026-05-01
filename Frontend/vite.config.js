@@ -9,10 +9,16 @@ export default defineConfig({
     chunkSizeWarningLimit: 1000,
     rollupOptions: {
       output: {
-        manualChunks: {
-          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
-          'socket-vendor': ['socket.io-client'],
-          'axios-vendor': ['axios'],
+        manualChunks(id) {
+          if (id.includes('node_modules/react')) {
+            return 'react-vendor';
+          }
+          if (id.includes('node_modules/socket.io-client')) {
+            return 'socket-vendor';
+          }
+          if (id.includes('node_modules/axios')) {
+            return 'axios-vendor';
+          }
         },
       },
     },
