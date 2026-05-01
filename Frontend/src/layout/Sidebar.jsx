@@ -157,49 +157,34 @@ const Sidebar = ({ collapsed, setCollapsed, user }) => {
 
       {/* User section */}
       <div style={styles.userSection}>
-        {!collapsed && (
-          <button
-            onClick={toggleTheme}
-            style={{
-              width: "100%",
-              padding: "8px",
-              marginBottom: "12px",
-              background: isDark ? "rgba(127,119,221,0.1)" : "rgba(127,119,221,0.15)",
-              border: "1px solid rgba(127,119,221,0.3)",
-              borderRadius: "6px",
-              color: "#afa9ec",
-              fontSize: "12px",
-              fontWeight: 500,
-              cursor: "pointer",
-              transition: "all 0.2s ease",
-            }}
-            onMouseOver={(e) => e.target.style.background = isDark ? "rgba(127,119,221,0.15)" : "rgba(127,119,221,0.2)"}
-            onMouseOut={(e) => e.target.style.background = isDark ? "rgba(127,119,221,0.1)" : "rgba(127,119,221,0.15)"}
-          >
-            {isDark ? "☀️ Light Mode" : "🌙 Dark Mode"}
-          </button>
-        )}
-        {collapsed && (
-          <button
-            onClick={toggleTheme}
-            style={{
-              width: "100%",
-              padding: "8px",
-              marginBottom: "12px",
-              background: "rgba(127,119,221,0.1)",
-              border: "none",
-              borderRadius: "6px",
-              color: "#afa9ec",
-              cursor: "pointer",
-              fontSize: "14px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            {isDark ? "☀️" : "🌙"}
-          </button>
-        )}
+        {/* Theme toggle always visible */}
+        <button
+          onClick={toggleTheme}
+          style={{
+            width: "100%",
+            padding: collapsed ? "8px" : "10px",
+            marginBottom: "12px",
+            background: isDark ? "rgba(127,119,221,0.15)" : "rgba(127,119,221,0.2)",
+            border: "1px solid rgba(127,119,221,0.4)",
+            borderRadius: "6px",
+            color: "#afa9ec",
+            fontSize: collapsed ? "16px" : "12px",
+            fontWeight: 500,
+            cursor: "pointer",
+            transition: "all 0.2s ease",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: collapsed ? "center" : "flex-start",
+            gap: collapsed ? "0" : "8px",
+          }}
+          onMouseOver={(e) => e.target.style.background = isDark ? "rgba(127,119,221,0.25)" : "rgba(127,119,221,0.3)"}
+          onMouseOut={(e) => e.target.style.background = isDark ? "rgba(127,119,221,0.15)" : "rgba(127,119,221,0.2)"}
+          title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
+        >
+          <span>{isDark ? "☀️" : "🌙"}</span>
+          {!collapsed && <span>{isDark ? "Light Mode" : "Dark Mode"}</span>}
+        </button>
+
         {user ? (
           <div style={styles.userRow}>
             <div style={styles.avatar}>{user.initials}</div>
