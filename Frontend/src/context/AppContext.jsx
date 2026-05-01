@@ -193,7 +193,7 @@ export const AppProvider = ({ children }) => {
 
     setDesignLoading(true);
     try {
-      const res = await fetch("http://localhost:8000/api/designs", {
+      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/designs`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -306,7 +306,7 @@ export const AppProvider = ({ children }) => {
 
     setProjectLoading(true);
     try {
-      const res = await fetch("http://localhost:8000/api/projects", {
+      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/projects`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

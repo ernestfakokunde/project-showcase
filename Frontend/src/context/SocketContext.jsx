@@ -19,7 +19,7 @@ export const SocketProvider = ({ children }) => {
       return undefined;
     }
 
-    const nextSocket = io("http://localhost:8000", {
+    const nextSocket = io(import.meta.env.VITE_API_BASE_URL.replace('/api', ''), {
       auth: { token },
       transports: ["websocket", "polling"],
     });

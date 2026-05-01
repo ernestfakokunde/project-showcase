@@ -39,7 +39,7 @@ export const AuthProvider = ({ children }) => {
         let freshUser = parsedUser;
 
         try {
-          const res = await fetch("http://localhost:8000/api/users/me", {
+          const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/users/me`, {
             headers: { Authorization: `Bearer ${storedToken}` },
           });
           const data = await res.json();
@@ -115,7 +115,7 @@ const authFetch = async (url, options = {}) => {
     if (!currentToken) {
       console.warn("AuthProvider: No token found for request to", url);
     }
-    const res = await fetch(`http://localhost:8000${url}`, {
+    const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}${url}`, {
       ...options,
       headers: {
         "Content-Type": "application/json",

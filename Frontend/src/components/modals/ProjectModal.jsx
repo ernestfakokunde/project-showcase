@@ -80,7 +80,7 @@ const ProjectModal = () => {
 
     try {
       setUploadingCover(true);
-      const res = await fetch("http://localhost:8000/api/uploads/project-image", {
+      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/uploads/project-image`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
