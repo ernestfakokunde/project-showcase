@@ -94,7 +94,7 @@ const CollabRequests = () => {
 
   const handleAccept = async (requestId) => {
     try {
-      const res = await authFetch(`/api/requests/${requestId}/accept`, { method: "PUT" });
+      const res = await authFetch(`/requests/${requestId}/accept`, { method: "PUT" });
       const data = await res.json();
 
       if (!res.ok) {
@@ -113,7 +113,7 @@ const CollabRequests = () => {
 
   const handleDecline = async (requestId) => {
     try {
-      const res = await authFetch(`/api/requests/${requestId}/decline`, { method: "PUT" });
+      const res = await authFetch(`/requests/${requestId}/decline`, { method: "PUT" });
       const data = await res.json();
 
       if (!res.ok) {
@@ -132,7 +132,7 @@ const CollabRequests = () => {
 
   const handleCancel = async (requestId) => {
     try {
-      const res = await authFetch(`/api/requests/${requestId}`, { method: "DELETE" });
+      const res = await authFetch(`/requests/${requestId}`, { method: "DELETE" });
       const data = await res.json();
 
       if (!res.ok) {

@@ -41,7 +41,7 @@ const MyProjects = () => {
     }
 
     try {
-      const res = await authFetch(`/api/projects/${projectId}`, { method: "DELETE" });
+      const res = await authFetch(`/projects/${projectId}`, { method: "DELETE" });
 
       if (!res.ok) {
         const data = await res.json();

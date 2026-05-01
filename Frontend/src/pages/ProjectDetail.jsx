@@ -47,7 +47,7 @@ const ProjectDetail = () => {
     try {
       console.log(`Fetching project with ID: ${id}`);
       setError(null);
-      const res = await authFetch(`/api/projects/${id}`);
+      const res = await authFetch(`/projects/${id}`);
       const data = await res.json();
 
       if (!res.ok) {
@@ -77,7 +77,7 @@ const ProjectDetail = () => {
 
   const fetchComments = async () => {
     try {
-      const res = await authFetch(`/api/comments/${id}`);
+      const res = await authFetch(`/comments/${id}`);
       const data = await res.json();
 
       if (res.ok) {
@@ -185,7 +185,7 @@ const ProjectDetail = () => {
 
     try {
       console.log(`[Follow Project] Starting follow request for user ${project.owner._id}`);
-      const res = await authFetch(`/api/users/${project.owner._id}/follow`, {
+      const res = await authFetch(`/users/${project.owner._id}/follow`, {
         method: "PUT",
       });
       
@@ -209,7 +209,7 @@ const ProjectDetail = () => {
 
   const handleLikeProject = async () => {
     try {
-      const res = await authFetch(`/api/projects/${id}/like`, { method: "PUT" });
+      const res = await authFetch(`/projects/${id}/like`, { method: "PUT" });
       const data = await res.json();
 
       if (!res.ok) {

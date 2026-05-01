@@ -77,7 +77,7 @@ const Feed = () => {
 
   const handleLike = async (projectId) => {
     try {
-      const res = await authFetch(`/api/projects/${projectId}/like`, { method: "PUT" });
+      const res = await authFetch(`/projects/${projectId}/like`, { method: "PUT" });
       const data = await res.json();
 
       if (!res.ok) throw new Error(data.message || "Failed to like project");
@@ -95,7 +95,7 @@ const Feed = () => {
 
   const handleSave = async (projectId) => {
     try {
-      const res = await authFetch(`/api/projects/${projectId}/save`, { method: "PUT" });
+      const res = await authFetch(`/projects/${projectId}/save`, { method: "PUT" });
       const data = await res.json().catch(() => ({}));
 
       if (!res.ok) throw new Error(data.message || "Failed to save project");

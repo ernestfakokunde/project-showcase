@@ -31,7 +31,7 @@ const Profile = () => {
     const fetchProfile = async () => {
       try {
         setLoading(true);
-        const res = await authFetch(`/api/users/${username}`);
+        const res = await authFetch(`/users/${username}`);
         const data = await res.json();
 
         if (!res.ok) {
@@ -44,7 +44,7 @@ const Profile = () => {
         setLikedProjects(data.likedProjects || []);
 
         // Fetch designs for this user
-        const designRes = await authFetch(`/api/designs/user/${data.user._id}`);
+        const designRes = await authFetch(`/designs/user/${data.user._id}`);
         const designData = await designRes.json();
         if (designRes.ok) {
           setDesigns(designData.designs || []);
@@ -85,7 +85,7 @@ const Profile = () => {
 
   const handleFollow = async () => {
     try {
-      const res = await authFetch(`/api/users/${user._id}/follow`, { method: "PUT" });
+      const res = await authFetch(`/users/${user._id}/follow`, { method: "PUT" });
       if (res.ok) {
         const data = await res.json();
         setUser((prev) => ({
@@ -108,7 +108,7 @@ const Profile = () => {
     }
 
     try {
-      const res = await authFetch(`/api/users/profile`, {
+      const res = await authFetch(`/users/profile`, {
         method: "PUT",
         body: JSON.stringify(formData),
       });

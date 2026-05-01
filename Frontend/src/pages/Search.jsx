@@ -29,7 +29,7 @@ const Search = () => {
 
       try {
         setLoading(true);
-        const res = await authFetch(`/api/projects/search/global?q=${encodeURIComponent(query)}&limit=12`);
+        const res = await authFetch(`/projects/search/global?q=${encodeURIComponent(query)}&limit=12`);
         const data = await res.json();
 
         if (!res.ok) throw new Error(data.message || "Search failed");

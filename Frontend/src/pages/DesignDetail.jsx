@@ -28,7 +28,7 @@ const DesignDetail = () => {
   const fetchDesign = async () => {
     try {
       setLoading(true);
-      const res = await authFetch(`/api/designs/${id}`);
+      const res = await authFetch(`/designs/${id}`);
       const data = await res.json();
 
       if (!res.ok) {
@@ -61,7 +61,7 @@ const DesignDetail = () => {
 
     try {
       console.log(`[Like Detail] Starting like request for design ${id}`);
-      const res = await authFetch(`/api/designs/${id}/like`, {
+      const res = await authFetch(`/designs/${id}/like`, {
         method: "POST",
       });
       
@@ -91,7 +91,7 @@ const DesignDetail = () => {
 
     try {
       console.log(`[Save Detail] Starting save request for design ${id}`);
-      const res = await authFetch(`/api/designs/${id}/save`, {
+      const res = await authFetch(`/designs/${id}/save`, {
         method: "POST",
       });
       
@@ -121,7 +121,7 @@ const DesignDetail = () => {
 
     try {
       console.log(`[Follow Detail] Starting follow request for user ${design.owner._id}`);
-      const res = await authFetch(`/api/users/${design.owner._id}/follow`, {
+      const res = await authFetch(`/users/${design.owner._id}/follow`, {
         method: "PUT",
       });
       
@@ -148,7 +148,7 @@ const DesignDetail = () => {
     if (!commentText.trim()) return;
 
     try {
-      const res = await authFetch(`/api/designs/${id}/comments`, {
+      const res = await authFetch(`/designs/${id}/comments`, {
         method: "POST",
         body: JSON.stringify({ text: commentText }),
       });

@@ -49,7 +49,7 @@ const Messages = () => {
   const fetchMessages = async (userId) => {
     try {
       setLoading(true);
-      const res = await authFetch(`/api/messages/${userId}`);
+      const res = await authFetch(`/messages/${userId}`);
       const data = await res.json();
 
       if (!res.ok) throw new Error(data.message);
@@ -112,7 +112,7 @@ const Messages = () => {
     if (!confirm("Delete this message?")) return;
 
     try {
-      const res = await authFetch(`/api/messages/${messageId}`, {
+      const res = await authFetch(`/messages/${messageId}`, {
         method: "DELETE",
       });
 

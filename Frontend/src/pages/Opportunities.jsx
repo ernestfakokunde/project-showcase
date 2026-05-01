@@ -26,7 +26,7 @@ const Opportunities = () => {
     const fetchRoles = async () => {
       try {
         setLoading(true);
-        const res = await authFetch(`/api/projects/roles/open?${params}`);
+        const res = await authFetch(`/projects/roles/open?${params}`);
         const data = await res.json();
 
         if (!res.ok) throw new Error(data.message || "Failed to load opportunities");

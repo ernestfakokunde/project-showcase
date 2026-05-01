@@ -30,7 +30,7 @@ const DesignsFeed = () => {
         ...(category && { category }),
       }).toString();
 
-      const res = await authFetch(`/api/designs?${query}`);
+      const res = await authFetch(`/designs?${query}`);
       const data = await res.json();
 
       if (res.ok) {
@@ -164,7 +164,7 @@ const DesignCard = ({ design, onUpdate }) => {
 
     try {
       console.log(`[Like] Starting like request for design ${design._id}`);
-      const res = await authFetch(`/api/designs/${design._id}/like`, {
+      const res = await authFetch(`/designs/${design._id}/like`, {
         method: "POST",
       });
       
@@ -196,7 +196,7 @@ const DesignCard = ({ design, onUpdate }) => {
 
     try {
       console.log(`[Save] Starting save request for design ${design._id}`);
-      const res = await authFetch(`/api/designs/${design._id}/save`, {
+      const res = await authFetch(`/designs/${design._id}/save`, {
         method: "POST",
       });
       
@@ -227,7 +227,7 @@ const DesignCard = ({ design, onUpdate }) => {
 
     try {
       console.log(`[Follow] Starting follow request for user ${design.owner._id}`);
-      const res = await authFetch(`/api/users/${design.owner._id}/follow`, {
+      const res = await authFetch(`/users/${design.owner._id}/follow`, {
         method: "PUT",
       });
       

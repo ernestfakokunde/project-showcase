@@ -90,7 +90,7 @@ const Notifications = () => {
 
   const handleMarkAsRead = async (notifId) => {
     try {
-      const res = await authFetch(`/api/notifications/${notifId}/read`, { method: "PUT" });
+      const res = await authFetch(`/notifications/${notifId}/read`, { method: "PUT" });
       const data = await res.json();
 
       if (!res.ok) {
@@ -129,7 +129,7 @@ const Notifications = () => {
 
   const handleDelete = async (notifId) => {
     try {
-      const res = await authFetch(`/api/notifications/${notifId}`, { method: "DELETE" });
+      const res = await authFetch(`/notifications/${notifId}`, { method: "DELETE" });
       const data = await res.json();
 
       if (!res.ok) {

@@ -21,7 +21,7 @@ export const AppProvider = ({ children }) => {
     }
 
     try {
-      const res = await authFetch("/api/users/me");
+      const res = await authFetch("/users/me");
       const data = await res.json();
 
       if (!res.ok) {
