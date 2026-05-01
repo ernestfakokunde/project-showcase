@@ -62,7 +62,7 @@ const DesignsFeed = () => {
           <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div>
               <p className="text-[11px] uppercase tracking-[0.24em] text-white/35">Design categories</p>
-              <h1 className="mt-2 text-xl font-semibold text-white sm:text-2xl">Browse designs by discipline</h1>
+              <h1 className="mt-2 text-xl font-semibold text-white sm:text-2xl">Explore Design Categories</h1>
               <p className="mt-2 max-w-2xl text-sm text-white/45">
                 Switch between product, branding, illustration, motion, and more without losing the visual flow of the page.
               </p>

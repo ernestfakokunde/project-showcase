@@ -1,4 +1,4 @@
-const ProfileHeader = ({ user, stats = {}, isOwnProfile = false, onFollow, onEdit }) => {
+const ProfileHeader = ({ user, stats = {}, isOwnProfile = false, onFollow, onEdit, onInvite }) => {
   const initials = (user?.username?.slice(0, 2) || user?.fullName?.slice(0, 2) || "SL").toUpperCase();
   const roles = user?.roles || [];
   const links = user?.links || {};
@@ -27,6 +27,11 @@ const ProfileHeader = ({ user, stats = {}, isOwnProfile = false, onFollow, onEdi
                 {user?.createdAt ? ` - Joined ${user.createdAt}` : ""}
               </div>
               <div className="mt-[6px] flex flex-wrap gap-[6px]">
+                {user?.availability ? (
+                  <span className="rounded-full bg-[#1d9e75]/15 px-[9px] py-[3px] text-[11px] text-[#6ee7bf]">
+                    {user.availability}
+                  </span>
+                ) : null}
                 {roles.length ? (
                   roles.map((role) => (
                     <span
@@ -52,6 +57,15 @@ const ProfileHeader = ({ user, stats = {}, isOwnProfile = false, onFollow, onEdi
                 Edit profile
               </button>
             ) : null}
+            {!isOwnProfile ? (
+              <button
+                type="button"
+                onClick={onInvite}
+                className="rounded-[8px] border border-[#7f77dd]/35 bg-[#7f77dd]/15 px-4 py-[7px] text-[12px] font-medium text-[#afa9ec] hover:bg-[#7f77dd]/20"
+              >
+                Invite
+              </button>
+            ) : null}
             <button
               type="button"
               onClick={onFollow}
@@ -75,9 +89,10 @@ const ProfileHeader = ({ user, stats = {}, isOwnProfile = false, onFollow, onEdi
 
         <div className="mt-4 flex flex-wrap gap-[10px]">
           {links.github ? <LinkPill label={links.github} icon={<UserIcon />} /> : null}
-          {links.website ? <LinkPill label={links.website} icon={<MailIcon />} /> : null}
+          {links.portfolio ? <LinkPill label={links.portfolio} icon={<MailIcon />} /> : null}
           {links.linkedin ? <LinkPill label={links.linkedin} icon={<LinkedinIcon />} /> : null}
-          {!links.github && !links.website && !links.linkedin ? (
+          {user?.featuredProject ? <LinkPill label={`Featured: ${user.featuredProject.title}`} icon={<CheckIcon className="h-3 w-3" />} /> : null}
+          {!links.github && !links.portfolio && !links.linkedin && !user?.featuredProject ? (
             <span className="text-[12px] text-white/30">No links added</span>
           ) : null}
         </div>

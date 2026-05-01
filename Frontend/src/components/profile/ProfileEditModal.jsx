@@ -5,6 +5,8 @@ const ProfileEditModal = ({ user, onClose, onSave, isOpen }) => {
     fullName: user?.fullName || "",
     bio: user?.bio || "",
     experienceLevel: user?.experienceLevel || "",
+    availability: user?.availability || "Open to collaborate",
+    featuredProject: user?.featuredProject?._id || "",
     skills: user?.skills || [],
     roles: user?.roles || [],
     links: {
@@ -62,6 +64,7 @@ const ProfileEditModal = ({ user, onClose, onSave, isOpen }) => {
 
   const ROLE_OPTIONS = ["Developer", "Designer", "Web3", "AI/ML", "Game Dev", "Motion", "Other"];
   const EXP_LEVELS = ["Junior", "Mid", "Senior"];
+  const AVAILABILITY = ["Open to collaborate", "Available for invites", "Busy"];
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 overflow-y-auto">
@@ -109,6 +112,26 @@ const ProfileEditModal = ({ user, onClose, onSave, isOpen }) => {
                 }`}
               >
                 {level}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Availability */}
+        <div className="mb-4">
+          <label className="text-xs font-medium text-white/60 mb-2 block">Availability</label>
+          <div className="flex flex-wrap gap-2">
+            {AVAILABILITY.map((item) => (
+              <button
+                key={item}
+                onClick={() => handleChange("availability", item)}
+                className={`px-3 py-1.5 text-xs font-medium rounded-[6px] transition ${
+                  formData.availability === item
+                    ? "bg-[#1d9e75] text-white"
+                    : "bg-white/5 border border-white/10 text-white/60 hover:bg-white/10"
+                }`}
+              >
+                {item}
               </button>
             ))}
           </div>

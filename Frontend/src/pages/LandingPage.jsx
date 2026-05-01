@@ -62,6 +62,18 @@ const categories = [
   { label: "Motion", icon: FaPalette },
 ];
 
+const previewProjects = [
+  { title: "Open-source design system", category: "Design", role: "Frontend Engineer", status: "Building" },
+  { title: "Web3 grant tracker", category: "Web3", role: "Smart Contract Dev", status: "Looking for collaborators" },
+  { title: "AI study planner", category: "AI / ML", role: "Product Designer", status: "Idea" },
+];
+
+const previewCreators = [
+  { username: "maya_ui", role: "Product Designer", availability: "Open to collaborate" },
+  { username: "tobi_dev", role: "Full-stack Developer", availability: "Available for invites" },
+  { username: "nora_ai", role: "AI Builder", availability: "Open to collaborate" },
+];
+
 const faqs = [
   {
     question: "Is StackLab only for developers?",
@@ -199,6 +211,53 @@ const LandingPage = () => {
                     <div key={role} className="rounded-lg border border-white/10 bg-white/[0.03] p-4">
                       <p className="text-sm font-medium text-white">{role}</p>
                       <p className="mt-2 text-xs leading-5 text-white/45">Open role with clear scope and async collaboration.</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="border-t border-white/10 bg-[#08080c] py-18 sm:py-20">
+          <div className="mx-auto grid max-w-7xl gap-8 px-4 sm:px-6 lg:grid-cols-2 lg:px-8">
+            <div>
+              <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[#afa9ec]">Live Preview</p>
+              <h2 className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">See the kind of work and people you will find inside.</h2>
+              <p className="mt-4 text-base leading-7 text-white/50">
+                StackLab is built around real project cards, open roles, creator profiles, and invite-ready collaboration.
+              </p>
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="rounded-lg border border-white/10 bg-[#111118] p-4">
+                <h3 className="text-sm font-semibold uppercase tracking-[0.16em] text-white/35">Sample projects</h3>
+                <div className="mt-4 space-y-3">
+                  {previewProjects.map((project) => (
+                    <div key={project.title} className="rounded-lg border border-white/10 bg-white/[0.03] p-3">
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="rounded-md bg-[#7f77dd]/15 px-2 py-1 text-[11px] text-[#afa9ec]">{project.category}</span>
+                        <span className="text-[11px] text-[#6ee7bf]">{project.status}</span>
+                      </div>
+                      <p className="mt-3 text-sm font-medium text-white">{project.title}</p>
+                      <p className="mt-1 text-xs text-white/38">Open role: {project.role}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="rounded-lg border border-white/10 bg-[#111118] p-4">
+                <h3 className="text-sm font-semibold uppercase tracking-[0.16em] text-white/35">Creator profiles</h3>
+                <div className="mt-4 space-y-3">
+                  {previewCreators.map((creator) => (
+                    <div key={creator.username} className="flex items-center gap-3 rounded-lg border border-white/10 bg-white/[0.03] p-3">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#7f77dd]/25 text-sm font-semibold text-[#afa9ec]">
+                        {creator.username.slice(0, 2).toUpperCase()}
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-white">@{creator.username}</p>
+                        <p className="text-xs text-white/38">{creator.role} • {creator.availability}</p>
+                      </div>
                     </div>
                   ))}
                 </div>

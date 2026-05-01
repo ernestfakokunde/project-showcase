@@ -1,7 +1,11 @@
 import { useApp } from "../../context/AppContext";
 import { useAuth } from "../../context/AuthContext";
+import { useToast } from "../../context/ToastContext";
+import { useState } from "react";
 
 const ProjectModal = () => {
+  const [uploadingCover, setUploadingCover] = useState(false);
+
   const {
     projectForm,
     projectLoading,
@@ -14,10 +18,12 @@ const ProjectModal = () => {
   } = useApp();
 
   const { token } = useAuth();
+  const { addToast } = useToast();
 
   const CATEGORIES = ["Dev", "Design", "Web3", "AI/ML", "Game Dev", "Motion", "Open Source", "Other"];
   const EXPERIENCE_LEVELS = ["Junior", "Mid", "Senior", "Any"];
   const PROJECT_STAGES = ["Concept", "Just started", "In progress", "MVP done"];
+  const PROJECT_STATUSES = ["Idea", "Building", "Looking for collaborators", "Paused", "Launched"];
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -60,9 +66,46 @@ const ProjectModal = () => {
     }
   };
 
+  const handleCoverImageUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      addToast("Please select a valid image file", "error");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("image", file);
+
+    try {
+      setUploadingCover(true);
+      const res = await fetch("http://localhost:8000/api/uploads/project-image", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message || "Failed to upload image");
+      }
+
+      updateProjectField("coverImage", data.url);
+      addToast("Project image uploaded", "success");
+    } catch (error) {
+      addToast(error.message, "error");
+    } finally {
+      setUploadingCover(false);
+      e.target.value = "";
+    }
+  };
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
-      <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-[16px] bg-[#111118] border border-white/10">
+    <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/60 p-4 pt-10 sm:pt-14">
+      <div className="max-h-[calc(100vh-5rem)] w-full max-w-2xl overflow-y-auto rounded-[16px] bg-[#111118] border border-white/10">
         {/* Header */}
         <div className="sticky top-0 flex items-center justify-between border-b border-white/10 bg-[#111118] px-6 py-4">
           <div>
@@ -111,6 +154,45 @@ const ProjectModal = () => {
               value={projectForm.description}
               onChange={(e) => updateProjectField("description", e.target.value)}
             />
+          </div>
+
+          {/* Cover Image */}
+          <div>
+            <div className="mb-2 flex items-center justify-between gap-3">
+              <label className="block text-xs text-white/50">Project Image</label>
+              {projectForm.coverImage ? (
+                <button
+                  type="button"
+                  onClick={() => updateProjectField("coverImage", "")}
+                  className="text-xs text-red-400/80 hover:text-red-300"
+                >
+                  Remove
+                </button>
+              ) : null}
+            </div>
+
+            {projectForm.coverImage ? (
+              <div className="overflow-hidden rounded-[10px] border border-white/10 bg-[#0d0d14]">
+                <img src={projectForm.coverImage} alt="Project preview" className="h-36 w-full object-cover" />
+                <div className="border-t border-white/10 px-3 py-2 text-[11px] text-white/35">
+                  This image will appear on the feed and project page.
+                </div>
+              </div>
+            ) : (
+              <label className="flex h-32 cursor-pointer flex-col items-center justify-center rounded-[10px] border border-dashed border-white/15 bg-[#0d0d14] px-4 text-center transition hover:border-[#7f77dd]/45 hover:bg-white/[0.03]">
+                <span className="text-sm font-medium text-white/65">
+                  {uploadingCover ? "Uploading image..." : "Upload project image"}
+                </span>
+                <span className="mt-1 text-xs text-white/30">PNG, JPG, or WebP up to 5MB</span>
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleCoverImageUpload}
+                  disabled={uploadingCover}
+                />
+              </label>
+            )}
           </div>
 
           {/* Category */}
@@ -225,6 +307,22 @@ const ProjectModal = () => {
               {PROJECT_STAGES.map((stage) => (
                 <option key={stage} value={stage}>
                   {stage}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Project Status */}
+          <div>
+            <label className="mb-2 block text-xs text-white/50">Project Status</label>
+            <select
+              className="w-full rounded-[9px] border border-white/10 bg-[#0d0d14] px-4 py-2.5 text-sm text-white outline-none focus:border-[#7f77dd]/50"
+              value={projectForm.status}
+              onChange={(e) => updateProjectField("status", e.target.value)}
+            >
+              {PROJECT_STATUSES.map((status) => (
+                <option key={status} value={status}>
+                  {status}
                 </option>
               ))}
             </select>

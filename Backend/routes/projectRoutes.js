@@ -11,6 +11,8 @@ import {
   getSavedProjects,
   getMyProjects,
   getTrendingProjects,
+  getProjectRoles,
+  globalSearch,
 } from "../controllers/projectController.js";
 
 const router = express.Router();
@@ -19,6 +21,8 @@ const router = express.Router();
 router.get("/trending", protect, getTrendingProjects);
 router.get("/saved", protect, getSavedProjects);
 router.get("/my", protect, getMyProjects);
+router.get("/roles/open", protect, getProjectRoles);
+router.get("/search/global", protect, globalSearch);
 router.get("/", protect, getProjects);
 
 // CRUD

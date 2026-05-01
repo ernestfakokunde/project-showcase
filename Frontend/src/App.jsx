@@ -14,6 +14,7 @@ import Trending from "./pages/Trending";
 import Saved from "./pages/Saved";
 import MyProjects from "./pages/MyProjects";
 import Messages from "./pages/Messages";
+import Opportunities from "./pages/Opportunities";
 import AdminPanel from "./pages/AdminPanel";
 import AppLayout from "./layout/AppLayout";
 import ForgotPassword from "./pages/ForgotPassword";
@@ -97,6 +98,7 @@ function App() {
       >
         <Route path="feed" element={<Feed />} />
         <Route path="designs" element={<DesignsFeed />} />
+        <Route path="opportunities" element={<Opportunities />} />
         <Route path="design/:id" element={<DesignDetail />} />
         <Route path="search" element={<Search />} />
         <Route path="profile" element={<MyProfileRedirect />} />

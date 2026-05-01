@@ -40,6 +40,16 @@ const userSchema = new mongoose.Schema(
       default: [],
     },
     skills: [{ type: String }],
+    availability: {
+      type: String,
+      enum: ["Open to collaborate", "Available for invites", "Busy", ""],
+      default: "Open to collaborate",
+    },
+    featuredProject: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Project",
+      default: null,
+    },
     experienceLevel: {
       type: String,
       enum: ["Junior", "Mid", "Senior", ""],

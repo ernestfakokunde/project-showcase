@@ -37,6 +37,7 @@ const FeedCard = ({
   likes,
   commentsCount,
   spotsLeft,
+  status,
   createdAt,
 }) => {
   if (!title) return null;
@@ -70,6 +71,7 @@ const FeedCard = ({
 
       <div className="px-4 py-3">
         <div className="mb-[5px] text-[15px] font-medium text-white">{title}</div>
+        {status ? <div className="mb-2 text-[11px] text-[#6ee7bf]">{status}</div> : null}
         <div className="mb-[10px] text-[12px] leading-[1.55] text-white/40">
           {description || "No description provided."}
         </div>

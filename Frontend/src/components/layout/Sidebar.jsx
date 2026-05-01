@@ -2,6 +2,7 @@ import { NavLink, Link, useNavigate } from "react-router-dom";
 
 const menuItems = [
   { to: "/feed", label: "Feed", icon: FeedIcon },
+  { to: "/opportunities", label: "Opportunities", icon: RequestsIcon },
   { to: "/designs", label: "Designs", icon: DesignFilesIcon },
   { to: "/trending", label: "Trending", icon: TrendingIcon },
   { to: "/saved", label: "Saved", icon: SavedIcon },

@@ -2,6 +2,7 @@ import express from "express";
 import protect from "../middleware/authMiddleware.js";
 import {
   sendRequest,
+  inviteUser,
   getIncomingRequests,
   getSentRequests,
   acceptRequest,
@@ -12,6 +13,7 @@ import {
 const router = express.Router();
 
 router.post("/", protect, sendRequest);
+router.post("/invite", protect, inviteUser);
 router.get("/incoming", protect, getIncomingRequests);
 router.get("/sent", protect, getSentRequests);
 router.put("/:id/accept", protect, acceptRequest);

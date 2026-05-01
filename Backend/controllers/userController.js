@@ -11,6 +11,7 @@ export const getUserProfile = async (req, res) => {
 
     const user = await User.findOne({ username: username.toLowerCase() })
       .select("-password -resetPasswordToken -resetPasswordExpire");
+    await user?.populate("featuredProject", "title category status");
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
@@ -51,7 +52,7 @@ export const getUserProfile = async (req, res) => {
 // Update own profile
 export const updateProfile = async (req, res) => {
   try {
-    const { fullName, bio, avatar, roles, skills, experienceLevel, links } = req.body;
+    const { fullName, bio, avatar, roles, skills, experienceLevel, links, availability, featuredProject } = req.body;
 
     let user = await User.findById(req.user._id);
 
@@ -65,6 +66,8 @@ export const updateProfile = async (req, res) => {
     if (roles) user.roles = roles;
     if (skills) user.skills = skills;
     if (experienceLevel) user.experienceLevel = experienceLevel;
+    if (availability !== undefined) user.availability = availability;
+    if (featuredProject !== undefined) user.featuredProject = featuredProject || null;
     if (links) user.links = links;
 
     user = await user.save();

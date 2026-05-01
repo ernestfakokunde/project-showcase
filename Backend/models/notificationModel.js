@@ -15,7 +15,7 @@ const notificationSchema = new mongoose.Schema(
     type: {
       type: String,
       required: [true, "Type is required"],
-      enum: ["join_request", "accepted", "declined", "like", "comment", "follow"],
+      enum: ["join_request", "invite", "accepted", "declined", "like", "comment", "follow"],
     },
     project: {
       type: mongoose.Schema.Types.ObjectId,

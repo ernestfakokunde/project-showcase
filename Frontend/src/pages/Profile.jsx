@@ -21,6 +21,9 @@ const Profile = () => {
   const [error, setError] = useState(null);
   const [internalTab, setInternalTab] = useState("Projects");
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showInviteModal, setShowInviteModal] = useState(false);
+  const [myProjects, setMyProjects] = useState([]);
+  const [inviteForm, setInviteForm] = useState({ projectId: "", pitch: "" });
 
   const isOwnProfile = currentUser?.username === username;
 
@@ -124,6 +127,43 @@ const Profile = () => {
     }
   };
 
+  const openInviteModal = async () => {
+    try {
+      const res = await authFetch("/api/projects/my?limit=50");
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Failed to load your projects");
+      setMyProjects(data.projects || []);
+      setInviteForm({ projectId: data.projects?.[0]?._id || "", pitch: `I think you would be a great fit for one of my projects.` });
+      setShowInviteModal(true);
+    } catch (error) {
+      addToast(error.message, "error");
+    }
+  };
+
+  const handleInvite = async () => {
+    if (!inviteForm.projectId) {
+      addToast("Choose a project to invite them to", "error");
+      return;
+    }
+
+    try {
+      const res = await authFetch("/api/requests/invite", {
+        method: "POST",
+        body: JSON.stringify({
+          projectId: inviteForm.projectId,
+          userId: user._id,
+          pitch: inviteForm.pitch,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Failed to send invite");
+      setShowInviteModal(false);
+      addToast("Invite sent", "success");
+    } catch (error) {
+      addToast(error.message, "error");
+    }
+  };
+
   if (loading) {
     return <div className="min-h-screen bg-[#09090e] flex items-center justify-center text-white/50">Loading profile...</div>;
   }
@@ -148,6 +188,7 @@ const Profile = () => {
         isOwnProfile={isOwnProfile} 
         onFollow={handleFollow}
         onEdit={() => setShowEditModal(true)}
+        onInvite={openInviteModal}
       />
 
       <div className="flex flex-col lg:flex-row gap-5 px-4 sm:px-6 lg:px-8 py-5">
@@ -171,7 +212,13 @@ const Profile = () => {
         </div>
 
         <div className="lg:w-[260px] lg:shrink-0">
-          <ProfileSidebar skills={user?.skills || []} experience={user?.experience || []} activity={user?.activity || []} />
+          <ProfileSidebar
+            skills={user?.skills || []}
+            experienceLevel={user?.experienceLevel}
+            availability={user?.availability}
+            links={user?.links || {}}
+            activity={user?.activity || []}
+          />
         </div>
       </div>
 
@@ -181,6 +228,42 @@ const Profile = () => {
         onClose={() => setShowEditModal(false)}
         onSave={handleSaveProfile}
       />
+
+      {showInviteModal ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4">
+          <div className="w-full max-w-md rounded-xl border border-white/10 bg-[#111118] p-5">
+            <h2 className="text-lg font-semibold text-white">Invite @{user.username}</h2>
+            <p className="mt-1 text-sm text-white/40">Choose one of your projects and send a short note.</p>
+
+            <label className="mt-5 block text-xs text-white/50">Project</label>
+            <select
+              value={inviteForm.projectId}
+              onChange={(event) => setInviteForm((prev) => ({ ...prev, projectId: event.target.value }))}
+              className="mt-2 w-full rounded-lg border border-white/10 bg-[#0d0d14] px-3 py-2 text-sm text-white outline-none focus:border-[#7f77dd]/50"
+            >
+              {myProjects.map((project) => (
+                <option key={project._id} value={project._id}>{project.title}</option>
+              ))}
+            </select>
+
+            <label className="mt-4 block text-xs text-white/50">Message</label>
+            <textarea
+              value={inviteForm.pitch}
+              onChange={(event) => setInviteForm((prev) => ({ ...prev, pitch: event.target.value }))}
+              className="mt-2 h-24 w-full resize-none rounded-lg border border-white/10 bg-[#0d0d14] px-3 py-2 text-sm text-white outline-none focus:border-[#7f77dd]/50"
+            />
+
+            <div className="mt-5 flex gap-2">
+              <button onClick={() => setShowInviteModal(false)} className="flex-1 rounded-lg border border-white/10 bg-white/5 px-4 py-2 text-sm text-white/65 hover:bg-white/10">
+                Cancel
+              </button>
+              <button onClick={handleInvite} className="flex-1 rounded-lg bg-[#7f77dd] px-4 py-2 text-sm font-semibold text-white hover:bg-[#6f67ce]">
+                Send invite
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </main>
   );
 };

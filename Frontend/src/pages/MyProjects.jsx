@@ -85,8 +85,8 @@ const MyProjects = () => {
                         Created on {new Date(project.createdAt).toLocaleDateString()}
                       </p>
                     </a>
-                    <span className={`text-[11px] px-2 py-1 rounded-[3px] ${"bg-green-500/20 text-green-400"}`}>
-                      Active
+                    <span className="text-[11px] px-2 py-1 rounded-[3px] bg-green-500/20 text-green-400">
+                      {project.status || "Active"}
                     </span>
                   </div>
 

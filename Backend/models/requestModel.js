@@ -46,6 +46,11 @@ const requestSchema = new mongoose.Schema(
       enum: ["pending", "accepted", "declined"],
       default: "pending",
     },
+    type: {
+      type: String,
+      enum: ["request", "invite"],
+      default: "request",
+    },
   },
   { timestamps: true }
 );

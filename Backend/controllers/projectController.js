@@ -8,7 +8,7 @@ import { autoFlagContent } from "../utils/contentFilter.js";
 // Create project
 export const createProject = async (req, res) => {
   try {
-    const { title, description, category, techStack, tools, experienceLevel, projectStage, chain, roles, links } = req.body;
+    const { title, description, category, techStack, tools, experienceLevel, projectStage, status, chain, roles, links, coverImage } = req.body;
 
     if (!title || !description || !category) {
       return res.status(400).json({ message: "Title, description, and category are required" });
@@ -42,9 +42,11 @@ export const createProject = async (req, res) => {
       tools: tools || [],
       experienceLevel: experienceLevel || "",
       projectStage: projectStage || "",
+      status: status || "Looking for collaborators",
       chain: chain || "",
       roles: roles || [],
       links: links || [],
+      coverImage: coverImage || "",
       isFlagged: flagResult.shouldFlag,
       flagLevel: flagResult.flagLevel,
       flags: flagResult.shouldFlag ? flagResult.reasons.map(reason => ({ reason })) : [],
@@ -89,14 +91,18 @@ export const createProject = async (req, res) => {
 // Get all projects (feed with filters)
 export const getProjects = async (req, res) => {
   try {
-    const { category, search, page = 1, limit = 10 } = req.query;
+    const { category, search, status, page = 1, limit = 10 } = req.query;
     let query = { isActive: true };
 
     if (category) query.category = category;
+    if (status) query.status = status;
     if (search) {
       query.$or = [
         { title: { $regex: search, $options: "i" } },
         { description: { $regex: search, $options: "i" } },
+        { "roles.title": { $regex: search, $options: "i" } },
+        { techStack: { $regex: search, $options: "i" } },
+        { tools: { $regex: search, $options: "i" } },
       ];
     }
 
@@ -169,7 +175,7 @@ export const updateProject = async (req, res) => {
       return res.status(403).json({ message: "Not authorized to update this project" });
     }
 
-    const { title, description, category, techStack, tools, experienceLevel, projectStage, chain, roles, links, coverImage } = req.body;
+    const { title, description, category, techStack, tools, experienceLevel, projectStage, status, chain, roles, links, coverImage } = req.body;
 
     if (title) project.title = title;
     if (description) project.description = description;
@@ -178,6 +184,7 @@ export const updateProject = async (req, res) => {
     if (tools) project.tools = tools;
     if (experienceLevel) project.experienceLevel = experienceLevel;
     if (projectStage) project.projectStage = projectStage;
+    if (status) project.status = status;
     if (chain) project.chain = chain;
     if (roles) project.roles = roles;
     if (links) project.links = links;
@@ -189,6 +196,103 @@ export const updateProject = async (req, res) => {
     res.json({ message: "Project updated successfully", project });
   } catch (error) {
     res.status(500).json({ message: "Error updating project", error: error.message });
+  }
+};
+
+// Get open project roles across the platform
+export const getProjectRoles = async (req, res) => {
+  try {
+    const { q, category, experienceLevel, page = 1, limit = 30 } = req.query;
+    const query = {
+      isActive: true,
+      roles: { $elemMatch: { status: "open" } },
+    };
+
+    if (category) query.category = category;
+    if (experienceLevel) query.experienceLevel = experienceLevel;
+    if (q) {
+      query.$or = [
+        { title: { $regex: q, $options: "i" } },
+        { description: { $regex: q, $options: "i" } },
+        { "roles.title": { $regex: q, $options: "i" } },
+        { "roles.description": { $regex: q, $options: "i" } },
+        { techStack: { $regex: q, $options: "i" } },
+        { tools: { $regex: q, $options: "i" } },
+      ];
+    }
+
+    const skip = (page - 1) * limit;
+    const projects = await Project.find(query)
+      .populate("owner", "username avatar roles")
+      .sort("-createdAt")
+      .skip(skip)
+      .limit(parseInt(limit));
+
+    const roles = projects.flatMap((project) =>
+      project.roles
+        .filter((role) => role.status === "open")
+        .map((role) => ({
+          _id: role._id,
+          title: role.title,
+          description: role.description,
+          project: {
+            _id: project._id,
+            title: project.title,
+            category: project.category,
+            status: project.status,
+            experienceLevel: project.experienceLevel,
+            techStack: project.techStack,
+            tools: project.tools,
+            owner: project.owner,
+          },
+        }))
+    );
+
+    res.json({ roles, pagination: { page: parseInt(page), limit: parseInt(limit) } });
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching project roles", error: error.message });
+  }
+};
+
+// Global search across projects, users, and roles
+export const globalSearch = async (req, res) => {
+  try {
+    const { q = "", limit = 8 } = req.query;
+    const term = q.trim();
+
+    if (!term) {
+      return res.json({ projects: [], users: [], roles: [] });
+    }
+
+    const regex = { $regex: term, $options: "i" };
+    const [projects, users, roleProjects] = await Promise.all([
+      Project.find({
+        isActive: true,
+        $or: [{ title: regex }, { description: regex }, { category: regex }, { techStack: regex }, { tools: regex }],
+      })
+        .populate("owner", "username avatar roles")
+        .sort("-createdAt")
+        .limit(parseInt(limit)),
+      User.find({
+        isActive: true,
+        $or: [{ username: regex }, { fullName: regex }, { bio: regex }, { roles: regex }, { skills: regex }],
+      })
+        .select("username avatar fullName roles bio skills role")
+        .limit(parseInt(limit)),
+      Project.find({ isActive: true, roles: { $elemMatch: { status: "open", $or: [{ title: regex }, { description: regex }] } } })
+        .populate("owner", "username avatar roles")
+        .limit(parseInt(limit)),
+    ]);
+
+    const roles = roleProjects.flatMap((project) =>
+      project.roles
+        .filter((role) => role.status === "open" && `${role.title} ${role.description}`.toLowerCase().includes(term.toLowerCase()))
+        .map((role) => ({ _id: role._id, title: role.title, description: role.description, project: { _id: project._id, title: project.title, category: project.category, owner: project.owner } }))
+    ).slice(0, parseInt(limit));
+
+    res.json({ projects, users, roles });
+  } catch (error) {
+    res.status(500).json({ message: "Search failed", error: error.message });
   }
 };
 

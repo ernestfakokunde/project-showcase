@@ -67,6 +67,11 @@ const projectSchema = new mongoose.Schema({
     ],
     default: "",
   },
+  status: {
+    type: String,
+    enum: ["Idea", "Building", "Looking for collaborators", "Paused", "Launched"],
+    default: "Looking for collaborators",
+  },
   // Web3 specific
   chain: {
     type: String,

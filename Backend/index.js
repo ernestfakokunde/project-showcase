@@ -13,6 +13,7 @@ import adminRoutes from "./routes/adminRoutes.js";
 import messageRoutes from "./routes/messageRoute.js";
 import designRoutes from "./routes/designRoutes.js";
 import reportRoutes from "./routes/reportRoutes.js";
+import uploadRoutes from "./routes/uploadRoutes.js";
 import { connectDB } from "./config/db.js";
 import User from "./models/userModel.js";
 import { getUserRoom, setSocketServer } from "./utils/realtime.js";
@@ -53,6 +54,7 @@ app.use(rateLimit(100, 15 * 60 * 1000)); // 100 requests per 15 minutes
 // Body parser with size limits
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ limit: "10mb", extended: true }));
+app.use("/uploads", express.static("uploads"));
 
 // Security headers
 app.use((req, res, next) => {
@@ -84,6 +86,7 @@ app.use("/api/requests", requestRoutes)
 app.use("/api/comments", commentRoutes)
 app.use("/api/notifications", notificationRoutes)
 app.use("/api/reports", reportRoutes)
+app.use("/api/uploads", uploadRoutes)
 app.use("/api/admin", adminRoutes)
 app.use("/api/messages", messageRoutes)
 
