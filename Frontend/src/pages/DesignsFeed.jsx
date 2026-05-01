@@ -2,12 +2,14 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
+import { useTheme } from "../context/ThemeContext";
 import Topbar from "../components/layout/Topbar";
 
 const DesignsFeed = () => {
   const navigate = useNavigate();
   const { authFetch } = useAuth();
   const { addToast } = useToast();
+  const { isDark } = useTheme();
 
   const [designs, setDesigns] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -54,21 +56,21 @@ const DesignsFeed = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#09090e]">
+    <div className={isDark ? "min-h-screen bg-[#09090e]" : "min-h-screen bg-gray-50"}>
       <Topbar variant="search" showNotifDot={false} />
 
       <div className="px-4 py-4 sm:px-6 sm:py-6">
-        <div className="mb-6 rounded-[20px] border border-white/10 bg-[#111118] p-4 sm:p-5">
+        <div className={`mb-6 rounded-[20px] ${isDark ? "border-white/10 bg-[#111118]" : "border-gray-300 bg-white"} p-4 sm:p-5`}>
           <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div>
-              <p className="text-[11px] uppercase tracking-[0.24em] text-white/35">Design categories</p>
-              <h1 className="mt-2 text-xl font-semibold text-white sm:text-2xl">Explore Design Categories</h1>
-              <p className="mt-2 max-w-2xl text-sm text-white/45">
+              <p className={`text-[11px] uppercase tracking-[0.24em] ${isDark ? "text-white/35" : "text-gray-500"}`}>Design categories</p>
+              <h1 className={`mt-2 text-xl font-semibold ${isDark ? "text-white" : "text-gray-900"} sm:text-2xl`}>Explore Design Categories</h1>
+              <p className={`mt-2 max-w-2xl text-sm ${isDark ? "text-white/45" : "text-gray-600"}`}>
                 Switch between product, branding, illustration, motion, and more without losing the visual flow of the page.
               </p>
             </div>
-            <div className="rounded-full border border-white/10 bg-white/[0.03] px-4 py-2 text-sm text-white/55">
-              Showing <span className="font-medium text-white">{category || "All Designs"}</span>
+            <div className={`rounded-full ${isDark ? "border-white/10 bg-white/[0.03]" : "border-gray-300 bg-gray-100"} px-4 py-2 text-sm ${isDark ? "text-white/55" : "text-gray-600"}`}>
+              Showing <span className={`font-medium ${isDark ? "text-white" : "text-gray-900"}`}>{category || "All Designs"}</span>
             </div>
           </div>
 
@@ -79,7 +81,9 @@ const DesignsFeed = () => {
                 className={`rounded-full px-4 py-2.5 text-sm transition whitespace-nowrap ${
                   category === ""
                     ? "bg-[#7f77dd] text-white shadow-[0_10px_30px_rgba(127,119,221,0.28)]"
-                    : "border border-white/10 bg-[#0d0d14] text-white/60 hover:border-white/20 hover:text-white"
+                    : isDark
+                    ? "border border-white/10 bg-[#0d0d14] text-white/60 hover:border-white/20 hover:text-white"
+                    : "border border-gray-300 bg-white text-gray-600 hover:border-gray-400 hover:text-gray-900"
                 }`}
               >
                 All Designs
@@ -91,7 +95,9 @@ const DesignsFeed = () => {
                   className={`rounded-full px-4 py-2.5 text-sm transition whitespace-nowrap ${
                     category === cat
                       ? "bg-[#7f77dd] text-white shadow-[0_10px_30px_rgba(127,119,221,0.28)]"
-                      : "border border-white/10 bg-[#0d0d14] text-white/60 hover:border-white/20 hover:text-white"
+                      : isDark
+                      ? "border border-white/10 bg-[#0d0d14] text-white/60 hover:border-white/20 hover:text-white"
+                      : "border border-gray-300 bg-white text-gray-600 hover:border-gray-400 hover:text-gray-900"
                   }`}
                 >
                   {cat}
@@ -103,11 +109,11 @@ const DesignsFeed = () => {
 
         <div className="min-w-0">
           {loading && designs.length === 0 ? (
-            <div className="flex items-center justify-center h-96 text-white/40">
+            <div className={`flex items-center justify-center h-96 ${isDark ? "text-white/40" : "text-gray-400"}`}>
               <p>Loading designs...</p>
             </div>
           ) : designs.length === 0 ? (
-            <div className="flex items-center justify-center h-96 text-white/40">
+            <div className={`flex items-center justify-center h-96 ${isDark ? "text-white/40" : "text-gray-400"}`}>
               <p>No designs found</p>
             </div>
           ) : (
@@ -140,6 +146,7 @@ const DesignsFeed = () => {
 const DesignCard = ({ design, onUpdate }) => {
   const { user, authFetch } = useAuth();
   const { addToast } = useToast();
+  const { isDark } = useTheme();
   const navigate = useNavigate();
 
   const [liked, setLiked] = useState(false);
@@ -250,11 +257,11 @@ const DesignCard = ({ design, onUpdate }) => {
   };
 
   return (
-    <div className="group rounded-[12px] border border-white/10 bg-[#111118] overflow-hidden hover:border-white/20 transition cursor-pointer"
+    <div className={`group rounded-[12px] ${isDark ? "border-white/10 bg-[#111118] hover:border-white/20" : "border-gray-300 bg-white hover:border-gray-400"} border overflow-hidden transition cursor-pointer`}
       onClick={() => navigate(`/design/${design._id}`)}
     >
       {/* Image */}
-      <div className="relative h-[200px] sm:h-[240px] bg-[#0d0d14] overflow-hidden">
+      <div className={`relative h-[200px] sm:h-[240px] ${isDark ? "bg-[#0d0d14]" : "bg-gray-100"} overflow-hidden`}>
         {design.images?.[0]?.url ? (
           <img
             src={design.images[0].url}
@@ -262,13 +269,13 @@ const DesignCard = ({ design, onUpdate }) => {
             className="w-full h-full object-cover group-hover:scale-105 transition"
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center text-white/20">
+          <div className={`w-full h-full flex items-center justify-center ${isDark ? "text-white/20" : "text-gray-300"}`}>
             No image
           </div>
         )}
 
         {/* Category badge */}
-        <span className="absolute top-2 left-2 rounded-[6px] bg-[#7f77dd]/90 px-2 py-1 text-[10px] font-medium text-white">
+        <span className={`absolute top-2 left-2 rounded-[6px] ${isDark ? "bg-[#7f77dd]/90" : "bg-[#7f77dd]"} px-2 py-1 text-[10px] font-medium text-white`}>
           {design.category}
         </span>
 
@@ -292,7 +299,7 @@ const DesignCard = ({ design, onUpdate }) => {
       </div>
 
       {/* Content */}
-      <div className="p-4">
+      <div className={`p-4 ${isDark ? "bg-[#111118]" : "bg-white"}`}>
         {/* Designer Info */}
         <div className="flex items-center justify-between gap-2 mb-3">
           <div 
@@ -302,17 +309,17 @@ const DesignCard = ({ design, onUpdate }) => {
               navigate(`/profile/${design.owner?.username}`);
             }}
           >
-            <div className="h-8 w-8 rounded-full bg-[#7f77dd]/25 flex items-center justify-center flex-shrink-0">
-              <span className="text-[10px] font-medium text-[#afa9ec]">
+            <div className={`h-8 w-8 rounded-full ${isDark ? "bg-[#7f77dd]/25" : "bg-[#7f77dd]/15"} flex items-center justify-center flex-shrink-0`}>
+              <span className={`text-[10px] font-medium ${isDark ? "text-[#afa9ec]" : "text-[#7f77dd]"}`}>
                 {design.owner?.username?.charAt(0).toUpperCase()}
               </span>
             </div>
             <div className="min-w-0 flex-1">
-              <div className="text-xs font-medium text-white truncate hover:text-[#7f77dd] transition">
+              <div className={`text-xs font-medium ${isDark ? "text-white hover:text-[#7f77dd]" : "text-gray-900 hover:text-[#7f77dd]"} truncate transition`}>
                 @{design.owner?.username}
               </div>
               {design.owner?.roles?.[0] && (
-                <div className="text-[10px] text-white/40 truncate">
+                <div className={`text-[10px] ${isDark ? "text-white/40" : "text-gray-500"} truncate`}>
                   {design.owner.roles[0]}
                 </div>
               )}
@@ -326,7 +333,9 @@ const DesignCard = ({ design, onUpdate }) => {
               }}
               className={`px-2 py-1 rounded text-xs font-medium transition flex-shrink-0 ${
                 isFollowing
-                  ? "bg-white/10 text-white/60 hover:bg-white/20"
+                  ? isDark
+                    ? "bg-white/10 text-white/60 hover:bg-white/20"
+                    : "bg-gray-200 text-gray-600 hover:bg-gray-300"
                   : "bg-[#7f77dd] text-white hover:bg-[#7f77dd]/90"
               }`}
             >
@@ -336,16 +345,16 @@ const DesignCard = ({ design, onUpdate }) => {
         </div>
 
         {/* Title */}
-        <h3 className="text-sm font-medium text-white mb-1 line-clamp-2">{design.title}</h3>
+        <h3 className={`text-sm font-medium ${isDark ? "text-white" : "text-gray-900"} mb-1 line-clamp-2`}>{design.title}</h3>
 
         {/* Description */}
-        <p className="text-xs text-white/40 mb-3 line-clamp-2">{design.description}</p>
+        <p className={`text-xs ${isDark ? "text-white/40" : "text-gray-500"} mb-3 line-clamp-2`}>{design.description}</p>
 
         {/* Tags */}
         {design.tags?.length > 0 && (
           <div className="flex flex-wrap gap-1 mb-3">
             {design.tags.slice(0, 3).map((tag, i) => (
-              <span key={i} className="text-[10px] text-white/40 px-1.5 py-0.5 rounded bg-white/5">
+              <span key={i} className={`text-[10px] ${isDark ? "text-white/40 bg-white/5" : "text-gray-600 bg-gray-100"} px-1.5 py-0.5 rounded`}>
                 #{tag}
               </span>
             ))}
@@ -353,16 +362,16 @@ const DesignCard = ({ design, onUpdate }) => {
         )}
 
         {/* Stats */}
-        <div className="flex gap-3 pt-3 border-t border-white/10 text-xs text-white/50">
-          <button onClick={handleLike} className={`flex items-center gap-1 hover:text-white transition ${liked ? "text-[#d85a30]" : ""}`}>
+        <div className={`flex gap-3 pt-3 ${isDark ? "border-t border-white/10 text-white/50" : "border-t border-gray-200 text-gray-500"} text-xs`}>
+          <button onClick={handleLike} className={`flex items-center gap-1 hover:${isDark ? "text-white" : "text-gray-900"} transition ${liked ? "text-[#d85a30]" : ""}`}>
             <HeartIcon filled={liked} size="sm" />
             {likeCount}
           </button>
-          <button className="flex items-center gap-1 hover:text-white transition">
+          <button className={`flex items-center gap-1 hover:${isDark ? "text-white" : "text-gray-900"} transition`}>
             <CommentIcon size="sm" />
             {design.comments?.length || 0}
           </button>
-          <button onClick={handleSave} className={`flex items-center gap-1 hover:text-white transition ${saved ? "text-[#7f77dd]" : ""}`}>
+          <button onClick={handleSave} className={`flex items-center gap-1 hover:${isDark ? "text-white" : "text-gray-900"} transition ${saved ? "text-[#7f77dd]" : ""}`}>
             <BookmarkIcon filled={saved} size="sm" />
           </button>
         </div>

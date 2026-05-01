@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
+import { useTheme } from "../context/ThemeContext";
 import Topbar from "../components/layout/Topbar";
 
 const MyProjects = () => {
   const { authFetch, user } = useAuth();
   const { addToast } = useToast();
+  const { isDark } = useTheme();
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);

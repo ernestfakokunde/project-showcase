@@ -2,6 +2,7 @@ import { useMemo, useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
+import { useTheme } from "../context/ThemeContext";
 import Topbar from "../components/layout/Topbar";
 import ProfileHeader from "../components/profile/ProfileHeader";
 import ProjectGrid from "../components/profile/ProjectGrid";
@@ -12,6 +13,7 @@ const Profile = () => {
   const { username } = useParams();
   const { user: currentUser, authFetch } = useAuth();
   const { addToast } = useToast();
+  const { isDark } = useTheme();
   const [user, setUser] = useState(null);
   const [projects, setProjects] = useState([]);
   const [designs, setDesigns] = useState([]);

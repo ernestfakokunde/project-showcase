@@ -1,11 +1,13 @@
 import { useState, useEffect, useRef } from "react";
 import { useAuth } from "../hooks/useAuth";
 import { useToast } from "../context/ToastContext";
+import { useTheme } from "../context/ThemeContext";
 import Topbar from "../components/layout/Topbar";
 
 const Messages = () => {
   const { user, authFetch } = useAuth();
   const { addToast } = useToast();
+  const { isDark } = useTheme();
   const [conversations, setConversations] = useState([]);
   const [selectedConversation, setSelectedConversation] = useState(null);
   const [messages, setMessages] = useState([]);

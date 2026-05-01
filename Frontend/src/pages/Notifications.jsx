@@ -3,6 +3,7 @@ import { useAuth } from "../context/AuthContext";
 import { useApp } from "../context/AppContext";
 import { useSocket } from "../context/SocketContext";
 import { useToast } from "../context/ToastContext";
+import { useTheme } from "../context/ThemeContext";
 import Topbar from "../components/layout/Topbar";
 
 const Notifications = () => {
@@ -10,6 +11,7 @@ const Notifications = () => {
   const { notifCount, setNotifCount, refreshCounts } = useApp();
   const { socket } = useSocket();
   const { addToast } = useToast();
+  const { isDark } = useTheme();
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [pageError, setPageError] = useState("");

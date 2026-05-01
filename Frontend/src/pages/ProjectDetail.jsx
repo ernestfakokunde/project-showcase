@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
 import { useApp } from "../context/AppContext";
+import { useTheme } from "../context/ThemeContext";
 import Topbar from "../components/layout/Topbar";
 
 const ProjectDetail = () => {
@@ -11,6 +12,7 @@ const ProjectDetail = () => {
   const { user, authFetch } = useAuth();
   const { addToast } = useToast();
   const { toggleSidebar } = useApp();
+  const { isDark } = useTheme();
 
   const [project, setProject] = useState(null);
   const [loading, setLoading] = useState(true);

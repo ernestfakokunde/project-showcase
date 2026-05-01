@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
+import { useTheme } from "../context/ThemeContext";
 import Topbar from "../components/layout/Topbar";
 
 const CATEGORIES = ["All", "Dev", "Design", "Web3", "AI/ML", "Game Dev", "Motion", "Open Source", "Other"];
@@ -22,6 +23,7 @@ const Feed = () => {
   const navigate = useNavigate();
   const { authFetch } = useAuth();
   const { addToast } = useToast();
+  const { isDark } = useTheme();
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeFilter, setActiveFilter] = useState("All");
@@ -107,12 +109,12 @@ const Feed = () => {
   };
 
   return (
-    <main className="min-h-screen bg-[#09090e] text-white">
+    <main className={isDark ? "min-h-screen bg-[#09090e] text-white" : "min-h-screen bg-white text-gray-900"}>
       <Topbar variant="search" showNotifDot={false} />
 
       <div className="flex min-h-[calc(100vh-63px)]">
-        <section className="min-w-0 flex-1 border-r border-white/10">
-          <div className="sticky top-0 z-10 border-b border-white/10 bg-[#09090e]/95 px-4 py-4 backdrop-blur sm:px-6">
+        <section className={`min-w-0 flex-1 ${isDark ? "border-r border-white/10" : "border-r border-gray-200"}`}>
+          <div className={`sticky top-0 z-10 ${isDark ? "border-b border-white/10 bg-[#09090e]/95" : "border-b border-gray-200 bg-white/95"} px-4 py-4 backdrop-blur sm:px-6`}>
             <div className="flex gap-2 overflow-x-auto pb-1">
               {CATEGORIES.map((category) => (
                 <button
@@ -124,7 +126,9 @@ const Feed = () => {
                   className={`shrink-0 rounded-lg px-3 py-2 text-xs font-medium transition ${
                     activeFilter === category
                       ? "bg-[#7f77dd] text-white"
-                      : "border border-white/10 bg-white/5 text-white/55 hover:bg-white/10"
+                      : isDark
+                      ? "border border-white/10 bg-white/5 text-white/55 hover:bg-white/10"
+                      : "border border-gray-300 bg-gray-50 text-gray-600 hover:bg-gray-100"
                   }`}
                 >
                   {category}
@@ -134,9 +138,9 @@ const Feed = () => {
           </div>
 
           {loading ? (
-            <div className="p-8 text-center text-white/40">Loading projects...</div>
+            <div className={`p-8 text-center ${isDark ? "text-white/40" : "text-gray-400"}`}>Loading projects...</div>
           ) : visibleProjects.length === 0 ? (
-            <div className="p-8 text-center text-white/40">No projects found for this view.</div>
+            <div className={`p-8 text-center ${isDark ? "text-white/40" : "text-gray-400"}`}>No projects found for this view.</div>
           ) : (
             <div className="grid gap-4 p-4 sm:p-6 xl:grid-cols-2">
               {visibleProjects.map((project) => (

@@ -71,6 +71,18 @@ const MyProfileRedirect = () => {
   return user ? <Navigate to={`/profile/${user.username}`} replace /> : <Navigate to="/feed" replace />;
 };
 
+const RootRedirect = () => {
+  const { user, loading } = useAuth();
+  
+  if (loading) return <div className="min-h-screen bg-[#09090e]" />;
+  
+  if (user) {
+    return <Navigate to="/feed" replace />;
+  }
+  
+  return <LandingPage />;
+};
+
 function App() {
   const { showProjectModal, showDesignModal } = useApp();
 
@@ -81,7 +93,7 @@ function App() {
       <Toast />
       <Routes>
       <Route path="/" element={<PublicLayout />}>
-        <Route index element={<LandingPage />} />
+        <Route index element={<RootRedirect />} />
         <Route path="login" element={<Login />} />
         <Route path="signup" element={<Signup />} />
         <Route path="forgot-password" element={<ForgotPassword />} />
