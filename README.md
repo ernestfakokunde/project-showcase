@@ -82,26 +82,6 @@ project-showcase/
    npm install
    ```
 
-### Environment Configuration
-
-**Backend (.env)**
-```
-PORT=5000
-MONGODB_URI=mongodb://localhost:27017/project-showcase
-JWT_SECRET=your_jwt_secret_key
-JWT_EXPIRE=7d
-SMTP_SERVICE=gmail
-SMTP_EMAIL=your_email@gmail.com
-SMTP_PASSWORD=your_app_password
-FRONTEND_URL=http://localhost:5173
-NODE_ENV=development
-```
-
-**Frontend (.env)**
-```
-VITE_API_URL=http://localhost:5000
-```
-
 ### Running Locally
 
 **Terminal 1 - Backend:**
